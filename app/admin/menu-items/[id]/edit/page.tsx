@@ -42,6 +42,7 @@ interface PageProps {
 export default function EditMenuItemPage({ params }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [menuId, setMenuId] = useState<string>("")
   const [initialLoading, setInitialLoading] = useState(true)
   const [categories, setCategories] = useState<FoodCategory[]>([])
   const [formData, setFormData] = useState<MenuItem>({
@@ -71,6 +72,13 @@ export default function EditMenuItemPage({ params }: PageProps) {
 
     setCategories(mockCategories)
   }, [])
+  useEffect(() => {
+      const getParams = async () => {
+        const resolvedParams = await params
+        setMenuId(resolvedParams.id)
+      }
+      getParams()
+    }, [params])
 
   useEffect(() => {
     // Mock API call to fetch menu item data - replace with actual implementation
@@ -80,7 +88,7 @@ export default function EditMenuItemPage({ params }: PageProps) {
 
         // Mock menu item data
         const mockMenuItem: MenuItem = {
-          id: params.id,
+          id: menuId,
           category_id: "cat1",
           name: "Gourmet Burger",
           description: "Premium beef patty with artisan toppings",
@@ -104,7 +112,7 @@ export default function EditMenuItemPage({ params }: PageProps) {
     }
 
     fetchMenuItem()
-  }, [params.id])
+  }, [menuId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
