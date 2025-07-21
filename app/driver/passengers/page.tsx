@@ -19,6 +19,21 @@ import {
 } from "@/components/ui/dialog"
 import { Search, Phone, MessageSquare, QrCode, MapPin, Star, Eye, Filter } from "lucide-react"
 import { toast } from "sonner"
+type Passenger = {
+  id: string
+  name: string
+  email: string
+  phone: string
+  pickup: string
+  destination: string
+  tripId: string
+  status: string
+  qrCode: string
+  foodItems: string[]
+  rating: number
+  totalTrips: number
+  joinDate: string
+}
 
 export default function DriverPassengers() {
   const [passengers, setPassengers] = useState([
@@ -71,7 +86,7 @@ export default function DriverPassengers() {
 
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [selectedPassenger, setSelectedPassenger] = useState(null)
+  const [selectedPassenger, setSelectedPassenger] = useState<Passenger | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
 
   const filteredPassengers = passengers.filter((passenger) => {
