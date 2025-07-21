@@ -61,12 +61,18 @@ export default function PaymentMethodsPage() {
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null)
-  const [newMethod, setNewMethod] = useState({
-    type: "mpesa" as const,
-    name: "",
-    details: "",
-    expiryDate: "",
-  })
+  const [newMethod, setNewMethod] = useState<{
+  type: "mpesa" | "card" | "wallet";
+  name: string;
+  details: string;
+  expiryDate: string;
+}>({
+  type: "mpesa",
+  name: "",
+  details: "",
+  expiryDate: "",
+});
+
 
   const getPaymentIcon = (type: string) => {
     switch (type) {
