@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -40,10 +39,10 @@ interface Booking {
   special_requests?: string
   payment_status: "pending" | "paid" | "refunded"
 }
+
 interface PageProps {
   params: Promise<{ id: string }>
 }
-
 
 export default function EditBookingPage({ params }: PageProps) {
   const router = useRouter()
@@ -51,6 +50,7 @@ export default function EditBookingPage({ params }: PageProps) {
   const [initialLoading, setInitialLoading] = useState(true)
   const [users, setUsers] = useState<User[]>([])
   const [trips, setTrips] = useState<Trip[]>([])
+  const [bookingId, setBookingId] = useState<string>("")
   const [formData, setFormData] = useState<Booking>({
     id: "",
     user_id: "",
@@ -61,6 +61,14 @@ export default function EditBookingPage({ params }: PageProps) {
     special_requests: "",
     payment_status: "pending",
   })
+
+  useEffect(() => {
+    const getParams = async () => {
+      const resolvedParams = await params
+      setBookingId(resolvedParams.id)
+    }
+    getParams()
+  }, [params])
 
   // Mock fetch users and trips - replace with actual API calls
   useEffect(() => {
@@ -90,6 +98,8 @@ export default function EditBookingPage({ params }: PageProps) {
   }, [])
 
   useEffect(() => {
+    if (!bookingId) return
+
     // Mock API call to fetch booking data - replace with actual implementation
     const fetchBooking = async () => {
       try {
@@ -97,7 +107,7 @@ export default function EditBookingPage({ params }: PageProps) {
 
         // Mock booking data
         const mockBooking: Booking = {
-          id: params.id,
+          id: bookingId,
           user_id: "user1",
           trip_id: "trip1",
           number_of_passengers: 2,
@@ -116,7 +126,7 @@ export default function EditBookingPage({ params }: PageProps) {
     }
 
     fetchBooking()
-  }, [params.id])
+  }, [bookingId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -127,7 +137,6 @@ export default function EditBookingPage({ params }: PageProps) {
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
       toast.success("Booking updated successfully")
-
       router.push("/admin/bookings")
     } catch (error) {
       toast.error("Failed to update booking")
