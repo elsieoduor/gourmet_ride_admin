@@ -39,6 +39,7 @@ interface PageProps {
 export default function EditNotificationPage({ params }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [notiId, setNotiId] = useState<string>("")
   const [initialLoading, setInitialLoading] = useState(true)
   const [users, setUsers] = useState<User[]>([])
   const [formData, setFormData] = useState<Notification>({
@@ -60,6 +61,13 @@ export default function EditNotificationPage({ params }: PageProps) {
 
     setUsers(mockUsers)
   }, [])
+  useEffect(() => {
+        const getParams = async () => {
+          const resolvedParams = await params
+          setNotiId(resolvedParams.id)
+        }
+        getParams()
+      }, [params])
 
   useEffect(() => {
     // Mock API call to fetch notification data - replace with actual implementation
@@ -69,7 +77,7 @@ export default function EditNotificationPage({ params }: PageProps) {
 
         // Mock notification data
         const mockNotification: Notification = {
-          id: params.id,
+          id: notiId,
           user_id: "user1",
           title: "Booking Confirmation",
           message: "Your booking #RD001 has been confirmed",
@@ -86,7 +94,7 @@ export default function EditNotificationPage({ params }: PageProps) {
     }
 
     fetchNotification()
-  }, [params.id])
+  }, [notiId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
