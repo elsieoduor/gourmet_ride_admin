@@ -228,7 +228,13 @@ export default function DriverSchedule() {
             <CardDescription>Select a date to view schedule</CardDescription>
           </CardHeader>
           <CardContent>
-            <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} className="rounded-md border" />
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              className="rounded-md border"
+              required
+            />
           </CardContent>
         </Card>
 
