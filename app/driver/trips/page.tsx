@@ -36,6 +36,18 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
+type Trip = {
+  id: string
+  route: string
+  date: string
+  time: string
+  status: string
+  passengers: number
+  maxCapacity: number
+  earnings: number
+  duration: string
+}
+
 export default function DriverTrips() {
   const [trips, setTrips] = useState([
     {
@@ -87,7 +99,7 @@ export default function DriverTrips() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [dateFilter, setDateFilter] = useState("")
-  const [selectedTrip, setSelectedTrip] = useState(null)
+  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
 
   const filteredTrips = trips.filter((trip) => {
