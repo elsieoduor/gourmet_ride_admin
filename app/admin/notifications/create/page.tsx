@@ -31,7 +31,12 @@ interface Notification {
   is_read: boolean
 }
 
-export default function EditNotificationPage({ params }: { params: { id: string } }) {
+interface PageProps {
+  params: Promise<{ id: string }>
+}
+
+
+export default function EditNotificationPage({ params }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
