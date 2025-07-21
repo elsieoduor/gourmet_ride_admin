@@ -75,7 +75,7 @@ export default function LoginPage() {
           </div>
 
           <Button className="w-full bg-[#27AE60] hover:bg-[#229954]" asChild>
-            <Link href={userType === "admin" ? "/admin" : userType === "driver" ? "/driver" : "/dashboard"}>
+            <Link href={userType === "admin" ? "/admin" : userType === "driver" ? "/driver" : "/customer"}>
               Sign In
             </Link>
           </Button>
