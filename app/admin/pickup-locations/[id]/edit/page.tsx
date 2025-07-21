@@ -94,9 +94,10 @@ export default function EditPickupLocationPage({ params }: PageProps) {
     }
   }
 
-  const handleInputChange = (field: string, value: string | number | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+  const handleInputChange = (field: string, value: string | number | boolean | undefined) => {
+  setFormData((prev) => ({ ...prev, [field]: value }))
+}
+
 
   if (initialLoading) {
     return (
