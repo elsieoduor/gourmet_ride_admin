@@ -1,0 +1,292 @@
+"use client"
+
+import type React from "react"
+
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { ArrowLeft, Save, Calendar } from "lucide-react"
+import { toast } from "sonner"
+
+interface User {
+  id: string
+  first_name: string
+  last_name: string
+  email: string
+}
+
+interface Trip {
+  id: string
+  route: {
+    name: string
+  }
+  scheduled_date: string
+  scheduled_time: string
+}
+
+interface Booking {
+  id: string
+  user_id: string
+  trip_id: string
+  number_of_passengers: number
+  total_amount: number
+  status: "pending" | "confirmed" | "cancelled" | "completed"
+  special_requests?: string
+  payment_status: "pending" | "paid" | "refunded"
+}
+
+export default function EditBookingPage({ params }: { params: { id: string } }) {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(true)
+  const [users, setUsers] = useState<User[]>([])
+  const [trips, setTrips] = useState<Trip[]>([])
+  const [formData, setFormData] = useState<Booking>({
+    id: "",
+    user_id: "",
+    trip_id: "",
+    number_of_passengers: 1,
+    total_amount: 0,
+    status: "pending",
+    special_requests: "",
+    payment_status: "pending",
+  })
+
+  // Mock fetch users and trips - replace with actual API calls
+  useEffect(() => {
+    const mockUsers: User[] = [
+      { id: "user1", first_name: "John", last_name: "Doe", email: "john@example.com" },
+      { id: "user2", first_name: "Jane", last_name: "Smith", email: "jane@example.com" },
+      { id: "user3", first_name: "Mike", last_name: "Johnson", email: "mike@example.com" },
+    ]
+
+    const mockTrips: Trip[] = [
+      {
+        id: "trip1",
+        route: { name: "City Center → Business District" },
+        scheduled_date: "2024-01-20",
+        scheduled_time: "12:30",
+      },
+      {
+        id: "trip2",
+        route: { name: "University → Shopping Mall" },
+        scheduled_date: "2024-01-21",
+        scheduled_time: "14:00",
+      },
+    ]
+
+    setUsers(mockUsers)
+    setTrips(mockTrips)
+  }, [])
+
+  useEffect(() => {
+    // Mock API call to fetch booking data - replace with actual implementation
+    const fetchBooking = async () => {
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
+        // Mock booking data
+        const mockBooking: Booking = {
+          id: params.id,
+          user_id: "user1",
+          trip_id: "trip1",
+          number_of_passengers: 2,
+          total_amount: 2000,
+          status: "confirmed",
+          special_requests: "Window seat preferred",
+          payment_status: "paid",
+        }
+
+        setFormData(mockBooking)
+      } catch (error) {
+        toast.error("Failed to load booking data")
+      } finally {
+        setInitialLoading(false)
+      }
+    }
+
+    fetchBooking()
+  }, [params.id])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
+    try {
+      // Mock API call - replace with actual implementation
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      toast.success("Booking updated successfully")
+
+      router.push("/admin/bookings")
+    } catch (error) {
+      toast.error("Failed to update booking")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleInputChange = (field: string, value: string | number) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  if (initialLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
+        <div className="h-64 bg-gray-200 rounded animate-pulse"></div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" asChild>
+          <Link href="/admin/bookings">
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold text-[#2C3E50]">Edit Booking</h1>
+          <p className="text-[#7F8C8D]">Update booking information</p>
+        </div>
+      </div>
+
+      {/* Form */}
+      <Card className="max-w-2xl">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-[#27AE60]" />
+            Booking Information
+          </CardTitle>
+          <CardDescription>Update the details for this booking</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="user_id">Customer *</Label>
+              <Select value={formData.user_id} onValueChange={(value) => handleInputChange("user_id", value)} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select customer" />
+                </SelectTrigger>
+                <SelectContent>
+                  {users.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.first_name} {user.last_name} ({user.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="trip_id">Trip *</Label>
+              <Select value={formData.trip_id} onValueChange={(value) => handleInputChange("trip_id", value)} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select trip" />
+                </SelectTrigger>
+                <SelectContent>
+                  {trips.map((trip) => (
+                    <SelectItem key={trip.id} value={trip.id}>
+                      {trip.route.name} - {trip.scheduled_date} at {trip.scheduled_time}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="number_of_passengers">Passengers *</Label>
+                <Input
+                  id="number_of_passengers"
+                  type="number"
+                  min="1"
+                  max="15"
+                  value={formData.number_of_passengers}
+                  onChange={(e) => handleInputChange("number_of_passengers", Number.parseInt(e.target.value))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="total_amount">Total Amount (KSH) *</Label>
+                <Input
+                  id="total_amount"
+                  type="number"
+                  min="0"
+                  step="50"
+                  value={formData.total_amount}
+                  onChange={(e) => handleInputChange("total_amount", Number.parseInt(e.target.value))}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="status">Booking Status *</Label>
+                <Select value={formData.status} onValueChange={(value) => handleInputChange("status", value)} required>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="payment_status">Payment Status *</Label>
+                <Select
+                  value={formData.payment_status}
+                  onValueChange={(value) => handleInputChange("payment_status", value)}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="refunded">Refunded</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="special_requests">Special Requests</Label>
+              <Textarea
+                id="special_requests"
+                value={formData.special_requests || ""}
+                onChange={(e) => handleInputChange("special_requests", e.target.value)}
+                placeholder="Any special requests from the customer"
+                rows={3}
+              />
+            </div>
+
+            <div className="flex gap-4 pt-4">
+              <Button type="submit" disabled={loading} className="bg-[#27AE60] hover:bg-[#229954]">
+                <Save className="h-4 w-4 mr-2" />
+                {loading ? "Updating..." : "Update Booking"}
+              </Button>
+              <Button type="button" variant="outline" asChild>
+                <Link href="/admin/bookings">Cancel</Link>
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
