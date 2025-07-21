@@ -22,8 +22,12 @@ interface PickupLocation {
   longitude?: number
   is_active: boolean
 }
+interface PageProps {
+  params: Promise<{ id: string }>
+}
 
-export default function EditPickupLocationPage({ params }: { params: { id: string } }) {
+
+export default function EditPickupLocationPage({ params }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)

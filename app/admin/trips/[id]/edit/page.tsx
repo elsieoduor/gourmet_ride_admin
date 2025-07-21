@@ -35,8 +35,12 @@ interface Trip {
   max_capacity: number
   notes?: string
 }
+interface PageProps {
+  params: Promise<{ id: string }>
+}
 
-export default function EditTripPage({ params }: { params: { id: string } }) {
+
+export default function EditTripPage({ params }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)

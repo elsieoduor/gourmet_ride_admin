@@ -25,8 +25,12 @@ interface User {
   role: "customer" | "driver" | "admin"
   is_active: boolean
 }
+interface PageProps {
+  params: Promise<{ id: string }>
+}
 
-export default function EditUserPage({ params }: { params: { id: string } }) {
+
+export default function EditUserPage({ params }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)

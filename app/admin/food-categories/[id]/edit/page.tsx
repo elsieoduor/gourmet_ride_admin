@@ -22,8 +22,12 @@ interface FoodCategory {
   sort_order: number
   is_active: boolean
 }
+interface PageProps {
+  params: Promise<{ id: string }>
+}
 
-export default function EditFoodCategoryPage({ params }: { params: { id: string } }) {
+
+export default function EditFoodCategoryPage({ params }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)

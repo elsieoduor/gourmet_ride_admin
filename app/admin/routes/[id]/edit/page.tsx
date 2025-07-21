@@ -29,8 +29,11 @@ interface Route {
   max_capacity: number
   is_active: boolean
 }
+interface PageProps {
+  params: Promise<{ id: string }>
+}
 
-export default function EditRoutePage({ params }: { params: { id: string } }) {
+export default function EditRoutePage({ params }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
