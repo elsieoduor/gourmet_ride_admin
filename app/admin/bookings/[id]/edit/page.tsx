@@ -40,8 +40,12 @@ interface Booking {
   special_requests?: string
   payment_status: "pending" | "paid" | "refunded"
 }
+interface PageProps {
+  params: Promise<{ id: string }>
+}
 
-export default function EditBookingPage({ params }: { params: { id: string } }) {
+
+export default function EditBookingPage({ params }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
