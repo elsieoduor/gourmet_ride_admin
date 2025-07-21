@@ -30,6 +30,7 @@ interface PageProps {
 export default function EditFoodCategoryPage({ params }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [foodId, setFoodId] = useState<string>("")
   const [initialLoading, setInitialLoading] = useState(true)
   const [formData, setFormData] = useState<FoodCategory>({
     id: "",
@@ -41,6 +42,14 @@ export default function EditFoodCategoryPage({ params }: PageProps) {
   })
 
   useEffect(() => {
+      const getParams = async () => {
+        const resolvedParams = await params
+        setFoodId(resolvedParams.id)
+      }
+      getParams()
+    }, [params])
+
+  useEffect(() => {
     // Mock API call to fetch category data - replace with actual implementation
     const fetchCategory = async () => {
       try {
@@ -48,7 +57,7 @@ export default function EditFoodCategoryPage({ params }: PageProps) {
 
         // Mock category data
         const mockCategory: FoodCategory = {
-          id: params.id,
+          id: foodId,
           name: "Main Course",
           description: "Primary dishes for a complete meal",
           image_url: "",
@@ -65,7 +74,7 @@ export default function EditFoodCategoryPage({ params }: PageProps) {
     }
 
     fetchCategory()
-  }, [params.id])
+  }, [foodId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
