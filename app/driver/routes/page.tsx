@@ -10,6 +10,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { MapPin, Clock, Users, DollarSign, Navigation, Search, Filter, Eye, Star } from "lucide-react"
 
+type Route = {
+  id: string
+  name: string
+  pickup: string
+  dropoff: string
+  distance: string
+  duration: string
+  pricePerPerson: number
+  maxCapacity: number
+  difficulty: "easy" | "moderate" | "hard"
+  rating: number
+  totalTrips: number
+  description: string
+  landmarks: string[]
+  trafficPatterns: Record<string, string>
+  estimatedEarnings: {
+    perTrip: number
+    perDay: number
+  }
+}
+
 export default function DriverRoutes() {
   const [routes, setRoutes] = useState([
     {
@@ -91,7 +112,7 @@ export default function DriverRoutes() {
 
   const [searchTerm, setSearchTerm] = useState("")
   const [difficultyFilter, setDifficultyFilter] = useState("all")
-  const [selectedRoute, setSelectedRoute] = useState(null)
+  const [selectedRoute, setSelectedRoute] = useState<Route | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
 
   const filteredRoutes = routes.filter((route) => {
