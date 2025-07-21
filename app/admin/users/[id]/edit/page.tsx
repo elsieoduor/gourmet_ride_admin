@@ -34,6 +34,7 @@ export default function EditUserPage({ params }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
+  const [userId, setUserId] = useState<string>("")
   const [formData, setFormData] = useState<User>({
     id: "",
     clerk_id: "",
@@ -47,6 +48,14 @@ export default function EditUserPage({ params }: PageProps) {
   })
 
   useEffect(() => {
+      const getParams = async () => {
+        const resolvedParams = await params
+        setUserId(resolvedParams.id)
+      }
+      getParams()
+    }, [params])
+
+  useEffect(() => {
     // Mock API call to fetch user data - replace with actual implementation
     const fetchUser = async () => {
       try {
@@ -54,7 +63,7 @@ export default function EditUserPage({ params }: PageProps) {
 
         // Mock user data
         const mockUser: User = {
-          id: params.id,
+          id: userId,
           clerk_id: "clerk_123",
           username: "johndoe",
           email: "john@example.com",
@@ -74,7 +83,7 @@ export default function EditUserPage({ params }: PageProps) {
     }
 
     fetchUser()
-  }, [params.id])
+  }, [userId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

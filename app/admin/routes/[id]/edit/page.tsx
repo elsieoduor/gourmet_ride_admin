@@ -37,6 +37,7 @@ export default function EditRoutePage({ params }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
+  const [routeId, setRouteId] = useState<string>("")
   const [locations, setLocations] = useState<PickupLocation[]>([])
   const [formData, setFormData] = useState<Route>({
     id: "",
@@ -61,6 +62,13 @@ export default function EditRoutePage({ params }: PageProps) {
 
     setLocations(mockLocations)
   }, [])
+  useEffect(() => {
+      const getParams = async () => {
+        const resolvedParams = await params
+        setRouteId(resolvedParams.id)
+      }
+      getParams()
+    }, [params])
 
   useEffect(() => {
     // Mock API call to fetch route data - replace with actual implementation
@@ -70,7 +78,7 @@ export default function EditRoutePage({ params }: PageProps) {
 
         // Mock route data
         const mockRoute: Route = {
-          id: params.id,
+          id: routeId,
           name: "City Center to Business District",
           pickup_location_id: "loc1",
           dropoff_location_id: "loc2",
@@ -89,7 +97,7 @@ export default function EditRoutePage({ params }: PageProps) {
     }
 
     fetchRoute()
-  }, [params.id])
+  }, [routeId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

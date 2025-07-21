@@ -44,6 +44,7 @@ export default function EditTripPage({ params }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
+  const [tripId, setTripId] = useState<string>("")
   const [routes, setRoutes] = useState<Route[]>([])
   const [drivers, setDrivers] = useState<Driver[]>([])
   const [formData, setFormData] = useState<Trip>({
@@ -76,6 +77,14 @@ export default function EditTripPage({ params }: PageProps) {
   }, [])
 
   useEffect(() => {
+      const getParams = async () => {
+        const resolvedParams = await params
+        setTripId(resolvedParams.id)
+      }
+      getParams()
+    }, [params])
+
+  useEffect(() => {
     // Mock API call to fetch trip data - replace with actual implementation
     const fetchTrip = async () => {
       try {
@@ -83,7 +92,7 @@ export default function EditTripPage({ params }: PageProps) {
 
         // Mock trip data
         const mockTrip: Trip = {
-          id: params.id,
+          id: tripId,
           route_id: "route1",
           driver_id: "driver1",
           scheduled_date: "2024-01-20",
@@ -103,7 +112,7 @@ export default function EditTripPage({ params }: PageProps) {
     }
 
     fetchTrip()
-  }, [params.id])
+  }, [tripId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
