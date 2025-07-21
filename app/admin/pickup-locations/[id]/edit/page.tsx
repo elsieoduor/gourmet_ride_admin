@@ -30,6 +30,7 @@ interface PageProps {
 export default function EditPickupLocationPage({ params }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [pickupId, setPickupId] = useState<string>("")
   const [initialLoading, setInitialLoading] = useState(true)
   const [formData, setFormData] = useState<PickupLocation>({
     id: "",
@@ -41,6 +42,14 @@ export default function EditPickupLocationPage({ params }: PageProps) {
   })
 
   useEffect(() => {
+        const getParams = async () => {
+          const resolvedParams = await params
+          setPickupId(resolvedParams.id)
+        }
+        getParams()
+      }, [params])
+
+  useEffect(() => {
     // Mock API call to fetch location data - replace with actual implementation
     const fetchLocation = async () => {
       try {
@@ -48,7 +57,7 @@ export default function EditPickupLocationPage({ params }: PageProps) {
 
         // Mock location data
         const mockLocation: PickupLocation = {
-          id: params.id,
+          id: pickupId,
           name: "City Center",
           address: "Main Street, Downtown Nairobi",
           latitude: -1.2864,
@@ -65,7 +74,7 @@ export default function EditPickupLocationPage({ params }: PageProps) {
     }
 
     fetchLocation()
-  }, [params.id])
+  }, [pickupId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
