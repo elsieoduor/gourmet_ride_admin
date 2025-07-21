@@ -32,7 +32,6 @@ const sidebarItems = [
   { href: "/admin/trips", label: "Trips", icon: Calendar },
   { href: "/admin/bookings", label: "Bookings", icon: Truck },
   { href: "/admin/notifications", label: "Notifications", icon: Bell },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

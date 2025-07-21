@@ -32,7 +32,6 @@ const navigation = [
   { name: "Notifications", href: "/customer/notifications", icon: Bell },
   { name: "Profile", href: "/customer/profile", icon: User },
   { name: "Settings", href: "/customer/settings", icon: Settings },
-  { name: "Help & Support", href: "/customer/support", icon: HelpCircle },
 ]
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
