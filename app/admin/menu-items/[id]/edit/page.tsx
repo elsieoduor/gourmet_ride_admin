@@ -62,16 +62,39 @@ export default function EditMenuItemPage({ params }: PageProps) {
   })
 
   // Mock fetch categories - replace with actual API call
-  useEffect(() => {
-    const mockCategories: FoodCategory[] = [
-      { id: "cat1", name: "Main Course" },
-      { id: "cat2", name: "Sides" },
-      { id: "cat3", name: "Salads" },
-      { id: "cat4", name: "Desserts" },
-    ]
+  // useEffect(() => {
+  //   const mockCategories: FoodCategory[] = [
+  //     { id: "cat1", name: "Main Course" },
+  //     { id: "cat2", name: "Sides" },
+  //     { id: "cat3", name: "Salads" },
+  //     { id: "cat4", name: "Desserts" },
+  //   ]
 
-    setCategories(mockCategories)
-  }, [])
+  //   setCategories(mockCategories)
+  // }, [])
+  useEffect(() => {
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/food-categories", {
+        credentials: "include",
+      })
+
+      const data = await res.json()
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Failed to fetch food categories")
+      }
+
+      setCategories(data.data) // adjust if your API returns differently
+    } catch (error) {
+      console.error("Failed to fetch categories:", error)
+      toast.error("Failed to load categories")
+    }
+  }
+
+  fetchCategories()
+}, [])
+
   useEffect(() => {
       const getParams = async () => {
         const resolvedParams = await params
@@ -80,57 +103,103 @@ export default function EditMenuItemPage({ params }: PageProps) {
       getParams()
     }, [params])
 
-  useEffect(() => {
-    // Mock API call to fetch menu item data - replace with actual implementation
-    const fetchMenuItem = async () => {
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+  // useEffect(() => {
+  //   // Mock API call to fetch menu item data - replace with actual implementation
+  //   const fetchMenuItem = async () => {
+  //     try {
+  //       await new Promise((resolve) => setTimeout(resolve, 1000))
 
-        // Mock menu item data
-        const mockMenuItem: MenuItem = {
-          id: menuId,
-          category_id: "cat1",
-          name: "Gourmet Burger",
-          description: "Premium beef patty with artisan toppings",
-          price: 800,
-          image_url: "",
-          ingredients: ["Beef", "Lettuce", "Tomato", "Cheese", "Bun"],
-          allergens: ["Gluten", "Dairy"],
-          is_vegetarian: false,
-          is_vegan: false,
-          is_available: true,
-          preparation_time: 15,
-          sort_order: 1,
-        }
+  //       // Mock menu item data
+  //       const mockMenuItem: MenuItem = {
+  //         id: menuId,
+  //         category_id: "cat1",
+  //         name: "Gourmet Burger",
+  //         description: "Premium beef patty with artisan toppings",
+  //         price: 800,
+  //         image_url: "",
+  //         ingredients: ["Beef", "Lettuce", "Tomato", "Cheese", "Bun"],
+  //         allergens: ["Gluten", "Dairy"],
+  //         is_vegetarian: false,
+  //         is_vegan: false,
+  //         is_available: true,
+  //         preparation_time: 15,
+  //         sort_order: 1,
+  //       }
 
-        setFormData(mockMenuItem)
-      } catch (error) {
-        toast.error("Failed to load menu item data")
-      } finally {
-        setInitialLoading(false)
-      }
-    }
+  //       setFormData(mockMenuItem)
+  //     } catch (error) {
+  //       toast.error("Failed to load menu item data")
+  //     } finally {
+  //       setInitialLoading(false)
+  //     }
+  //   }
 
-    fetchMenuItem()
-  }, [menuId])
+  //   fetchMenuItem()
+  // }, [menuId])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-
+    useEffect(() => {
+  const fetchMenuItem = async () => {
     try {
-      // Mock API call - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const res = await fetch(`http://localhost:5000/api/menu/${menuId}`, {
+        credentials: "include",
+      })
 
-      toast.success("Menu item updated successfully")
+      const data = await res.json()
+      console.log(data.data)
 
-      router.push("/admin/menu-items")
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Failed to fetch menu item")
+      }
+
+      const rawItem = data.data
+
+      const normalizedItem: MenuItem = {
+        ...rawItem,
+        category_id: rawItem.food_category_id, // Fix mapping
+      }
+
+      setFormData(normalizedItem)
+ // data.data must match your MenuItem type
     } catch (error) {
-      toast.error("Failed to update menu item")
+      console.error("Failed to fetch menu item:", error)
+      toast.error("Failed to load menu item")
     } finally {
-      setLoading(false)
+      setInitialLoading(false)
     }
   }
+
+  if (menuId) fetchMenuItem()
+}, [menuId])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setLoading(true)
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/menu/${menuId}`, {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+
+    const data = await res.json()
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || "Failed to update menu item")
+    }
+
+    toast.success("Menu item updated successfully")
+    router.push("/admin/menu-items")
+  } catch (error) {
+    console.error("Update failed:", error)
+    toast.error("Failed to update menu item")
+  } finally {
+    setLoading(false)
+  }
+}
 
   const handleInputChange = (field: string, value: string | number | boolean | string[]) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
