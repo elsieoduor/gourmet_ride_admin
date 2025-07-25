@@ -53,19 +53,16 @@ export default function EditPickupLocationPage({ params }: PageProps) {
     // Mock API call to fetch location data - replace with actual implementation
     const fetchLocation = async () => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        const res = await fetch(`http://localhost:5000/api/pickup-locations/${pickupId}`, {
+          credentials: "include",
+        })
+        const data = await res.json()
 
-        // Mock location data
-        const mockLocation: PickupLocation = {
-          id: pickupId,
-          name: "City Center",
-          address: "Main Street, Downtown Nairobi",
-          latitude: -1.2864,
-          longitude: 36.8172,
-          is_active: true,
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Failed to fetch pickup location")
         }
 
-        setFormData(mockLocation)
+        setFormData(data.data)
       } catch (error) {
         toast.error("Failed to load location data")
       } finally {
@@ -77,22 +74,40 @@ export default function EditPickupLocationPage({ params }: PageProps) {
   }, [pickupId])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+  e.preventDefault()
+  setLoading(true)
 
-    try {
-      // Mock API call - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+  try {
+    const res = await fetch(`http://localhost:5000/api/pickup-locations/${pickupId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include", // Optional: if your API uses cookies
+      body: JSON.stringify({
+        name: formData.name,
+        address: formData.address,
+        latitude: formData.latitude ,
+        longitude: formData.longitude,
+        is_active: formData.is_active,
+      }),
+    })
 
-      toast.success("Location updated successfully")
+    const data = await res.json()
 
-      router.push("/admin/pickup-locations")
-    } catch (error) {
-      toast.error("Failed to update location")
-    } finally {
-      setLoading(false)
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || "Failed to update location")
     }
+
+    toast.success("Location updated successfully")
+    router.push("/admin/pickup-locations")
+  } catch (error: any) {
+    toast.error(error.message || "Failed to update location")
+  } finally {
+    setLoading(false)
   }
+}
+
 
   const handleInputChange = (field: string, value: string | number | boolean | undefined) => {
   setFormData((prev) => ({ ...prev, [field]: value }))
@@ -189,9 +204,10 @@ export default function EditPickupLocationPage({ params }: PageProps) {
             <div className="flex items-center space-x-2">
               <Switch
                 id="is_active"
-                checked={formData.is_active}
+                checked={!!formData.is_active} // ensure it's boolean
                 onCheckedChange={(checked) => handleInputChange("is_active", checked)}
               />
+
               <Label htmlFor="is_active">Active Location</Label>
             </div>
 
