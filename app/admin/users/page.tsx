@@ -9,17 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Search, Edit, Trash2, Filter } from "lucide-react"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,AlertDialogTitle, AlertDialogTrigger,} from "@/components/ui/alert-dialog"
 
 interface User {
   id: string
@@ -45,60 +35,104 @@ export default function UsersPage() {
   const [totalPages, setTotalPages] = useState(1)
 
   // Mock data - replace with actual API calls
+  // useEffect(() => {
+  //   const mockUsers: User[] = [
+  //     {
+  //       id: "1",
+  //       clerk_id: "clerk_1",
+  //       username: "johndoe",
+  //       email: "john@example.com",
+  //       first_name: "John",
+  //       last_name: "Doe",
+  //       phone: "+254700000001",
+  //       role: "customer",
+  //       is_active: true,
+  //       created_at: "2024-01-15T10:00:00Z",
+  //       updated_at: "2024-01-15T10:00:00Z",
+  //     },
+  //     {
+  //       id: "2",
+  //       clerk_id: "clerk_2",
+  //       username: "janesmith",
+  //       email: "jane@example.com",
+  //       first_name: "Jane",
+  //       last_name: "Smith",
+  //       phone: "+254700000002",
+  //       role: "driver",
+  //       is_active: true,
+  //       created_at: "2024-01-14T09:00:00Z",
+  //       updated_at: "2024-01-14T09:00:00Z",
+  //     },
+  //     {
+  //       id: "3",
+  //       clerk_id: "clerk_3",
+  //       username: "admin",
+  //       email: "admin@ridedine.com",
+  //       first_name: "Admin",
+  //       last_name: "User",
+  //       phone: "+254700000003",
+  //       role: "admin",
+  //       is_active: true,
+  //       created_at: "2024-01-10T08:00:00Z",
+  //       updated_at: "2024-01-10T08:00:00Z",
+  //     },
+  //   ]
+
+  //   setTimeout(() => {
+  //     setUsers(mockUsers)
+  //     setLoading(false)
+  //     setTotalPages(1)
+  //   }, 1000)
+  // }, [currentPage, roleFilter, searchTerm])
+
   useEffect(() => {
-    const mockUsers: User[] = [
-      {
-        id: "1",
-        clerk_id: "clerk_1",
-        username: "johndoe",
-        email: "john@example.com",
-        first_name: "John",
-        last_name: "Doe",
-        phone: "+254700000001",
-        role: "customer",
-        is_active: true,
-        created_at: "2024-01-15T10:00:00Z",
-        updated_at: "2024-01-15T10:00:00Z",
-      },
-      {
-        id: "2",
-        clerk_id: "clerk_2",
-        username: "janesmith",
-        email: "jane@example.com",
-        first_name: "Jane",
-        last_name: "Smith",
-        phone: "+254700000002",
-        role: "driver",
-        is_active: true,
-        created_at: "2024-01-14T09:00:00Z",
-        updated_at: "2024-01-14T09:00:00Z",
-      },
-      {
-        id: "3",
-        clerk_id: "clerk_3",
-        username: "admin",
-        email: "admin@ridedine.com",
-        first_name: "Admin",
-        last_name: "User",
-        phone: "+254700000003",
-        role: "admin",
-        is_active: true,
-        created_at: "2024-01-10T08:00:00Z",
-        updated_at: "2024-01-10T08:00:00Z",
-      },
-    ]
+    const fetchUsers = async () => {
+      setLoading(true)
+      try {
+        const res = await fetch("http://localhost:5000/api/users", {
+          credentials: "include", // 🔑 Important if cookie-based auth is used
+        })
 
-    setTimeout(() => {
-      setUsers(mockUsers)
-      setLoading(false)
-      setTotalPages(1)
-    }, 1000)
-  }, [currentPage, roleFilter, searchTerm])
+        if (!res.ok) {
+          console.error("❌ Failed to fetch users:", res.statusText)
+          return
+        }
 
-  const handleDeleteUser = async (userId: string) => {
-    // Mock delete - replace with actual API call
-    setUsers(users.filter((user) => user.id !== userId))
+        const data = await res.json()
+        console.log("✅ Users fetched:", data)
+        setUsers(data.data)
+      } catch (err) {
+        console.error("❌ Error fetching users:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUsers()
+  }, [])
+
+ const handleDeleteUser = async (userId: string) => {
+  console.log("🗑️ Deleting user:", userId);
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/users/${userId}`, {
+      method: "DELETE",
+      credentials: "include", // 👈 to send cookies (auth)
+    });
+
+    const data = await res.json();
+    console.log("✅ Delete response:", data);
+
+    if (res.ok) {
+      setUsers(users.filter((user) => user.id !== userId)); // ✅ Update UI
+    } else {
+      alert(data.error || "Failed to delete user.");
+    }
+  } catch (error) {
+    console.error("❌ Delete failed:", error);
+    alert("Something went wrong.");
   }
+};
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
