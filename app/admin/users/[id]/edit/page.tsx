@@ -16,7 +16,6 @@ import { toast } from "sonner"
 
 interface User {
   id: string
-  clerk_id: string
   username?: string
   email: string
   first_name?: string
@@ -37,7 +36,6 @@ export default function EditUserPage({ params }: PageProps) {
   const [userId, setUserId] = useState<string>("")
   const [formData, setFormData] = useState<User>({
     id: "",
-    clerk_id: "",
     username: "",
     email: "",
     first_name: "",
@@ -56,48 +54,60 @@ export default function EditUserPage({ params }: PageProps) {
     }, [params])
 
   useEffect(() => {
-    // Mock API call to fetch user data - replace with actual implementation
-    const fetchUser = async () => {
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+  const fetchUser = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/users/${userId}`, {
+        credentials: "include",
+      })
 
-        // Mock user data
-        const mockUser: User = {
-          id: userId,
-          clerk_id: "clerk_123",
-          username: "johndoe",
-          email: "john@example.com",
-          first_name: "John",
-          last_name: "Doe",
-          phone: "+254700000001",
-          role: "customer",
-          is_active: true,
-        }
+      const json = await res.json()
 
-        setFormData(mockUser)
-      } catch (error) {
-        toast.error("Failed to load user data")
-      } finally {
-        setInitialLoading(false)
+      if (!res.ok || !json.success || !json.data) {
+        throw new Error(json.error || "Failed to fetch user")
       }
-    }
 
+      // Set form state with user data
+      setFormData(json.data)
+      console.log("Fetched user:", json.data)
+    } catch (error) {
+      console.error("Fetch error:", error)
+      toast.error("Failed to load user data")
+    } finally {
+      setInitialLoading(false)
+    }
+  }
+
+  if (userId) {
     fetchUser()
-  }, [userId])
+  }
+}, [userId])
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      // Mock API call - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const res = await fetch(`http://localhost:5000/api/users/${formData.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(formData),
+      })
+
+      const data = await res.json()
+      console.log(data)
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update user")
+      }
 
       toast.success("User updated successfully")
-
       router.push("/admin/users")
-    } catch (error) {
-      toast.error("Failed to update user")
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update user")
     } finally {
       setLoading(false)
     }
@@ -190,19 +200,6 @@ export default function EditUserPage({ params }: PageProps) {
                 onChange={(e) => handleInputChange("phone", e.target.value)}
                 placeholder="+254 700 000 000"
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="clerk_id">Clerk ID *</Label>
-              <Input
-                id="clerk_id"
-                value={formData.clerk_id}
-                onChange={(e) => handleInputChange("clerk_id", e.target.value)}
-                placeholder="Clerk authentication ID"
-                required
-                disabled
-              />
-              <p className="text-sm text-[#7F8C8D]">Clerk ID cannot be changed</p>
             </div>
 
             <div className="space-y-2">
