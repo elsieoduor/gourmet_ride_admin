@@ -30,14 +30,32 @@ export default function CreatePickupLocationPage() {
     setLoading(true)
 
     try {
-      // Mock API call - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const res = await fetch("http://localhost:5000/api/pickup-locations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // ⬅️ If you're using cookie-based auth
+        body: JSON.stringify({
+          name: formData.name,
+          address: formData.address,
+          latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+          longitude: formData.longitude ? parseFloat(formData.longitude) : null,
+          is_active: formData.is_active,
+        }),
+      })
 
-      toast.success("Pickup location created successfully")
+      const data = await res.json()
 
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to create location")
+      }
+
+      toast.success("✅ Pickup location created successfully")
       router.push("/admin/pickup-locations")
     } catch (error) {
-      toast.error("Failed to create pickup location")
+      console.error("Create error:", error)
+      toast.error("❌ Failed to create pickup location")
     } finally {
       setLoading(false)
     }
