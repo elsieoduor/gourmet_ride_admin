@@ -28,42 +28,87 @@ export default function CreateMenuItemPage() {
     category_id: "",
     name: "",
     description: "",
-    price: 0,
+    price: "", // Use string for form inputs
     image_url: "",
     ingredients: [] as string[],
     allergens: [] as string[],
     is_vegetarian: false,
     is_vegan: false,
     is_available: true,
-    preparation_time: 0,
-    sort_order: 0,
+    preparation_time: "", // Use string to avoid uncontrolled warning
+    sort_order: "", // Same here
   })
 
   // Mock fetch categories - replace with actual API call
-  useEffect(() => {
-    const mockCategories: FoodCategory[] = [
-      { id: "cat1", name: "Main Course" },
-      { id: "cat2", name: "Sides" },
-      { id: "cat3", name: "Salads" },
-      { id: "cat4", name: "Desserts" },
-    ]
+  // useEffect(() => {
+  //   const mockCategories: FoodCategory[] = [
+  //     { id: "cat1", name: "Main Course" },
+  //     { id: "cat2", name: "Sides" },
+  //     { id: "cat3", name: "Salads" },
+  //     { id: "cat4", name: "Desserts" },
+  //   ]
 
-    setCategories(mockCategories)
-  }, [])
+  //   setCategories(mockCategories)
+  // }, [])
+  useEffect(() => {
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/food-categories", {
+        credentials: "include",
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to fetch categories");
+      }
+
+      setCategories(data.data); // Adjust if the structure is different
+    } catch (error) {
+      console.error("Failed to load categories:", error);
+    }
+  };
+
+  fetchCategories();
+}, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      // Mock API call - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const res = await fetch("http://localhost:5000/api/menu", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // if needed for auth/session
+        body: JSON.stringify({
+          name: formData.name,
+          description: formData.description,
+          price: formData.price,
+          image_url: formData.image_url,
+          ingredients: formData.ingredients,
+          allergens: formData.allergens,
+          is_vegetarian: formData.is_vegetarian,
+          is_vegan: formData.is_vegan,
+          is_available: formData.is_available,
+          preparation_time: formData.preparation_time,
+          sort_order: formData.sort_order,
+          food_category_id: formData.category_id, // match API param
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to create menu item")
+      }
 
       toast.success("Menu item created successfully")
-
       router.push("/admin/menu-items")
-    } catch (error) {
-      toast.error("Failed to create menu item")
+    } catch (error: any) {
+      console.error("Submit error:", error)
+      toast.error(error.message || "Failed to create menu item")
     } finally {
       setLoading(false)
     }
@@ -127,6 +172,7 @@ export default function CreateMenuItemPage() {
                     </SelectItem>
                   ))}
                 </SelectContent>
+
               </Select>
             </div>
 
