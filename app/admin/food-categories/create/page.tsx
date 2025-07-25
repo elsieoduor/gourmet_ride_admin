@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -26,22 +25,33 @@ export default function CreateFoodCategoryPage() {
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+  e.preventDefault()
+  setLoading(true)
 
-    try {
-      // Mock API call - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+  try {
+    const res = await fetch("http://localhost:5000/api/food-categories", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(formData),
+    })
 
-      toast.success("Food category created successfully")
-
-      router.push("/admin/food-categories")
-    } catch (error) {
-      toast.error("Failed to create food category")
-    } finally {
-      setLoading(false)
+    if (!res.ok) {
+      const errorData = await res.json()
+      throw new Error(errorData.message || "Failed to create category")
     }
+
+    toast.success("Food category created successfully")
+    router.push("/admin/food-categories")
+  } catch (error: any) {
+    toast.error(error.message || "Failed to create food category")
+  } finally {
+    setLoading(false)
   }
+}
+
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
