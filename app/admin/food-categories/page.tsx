@@ -38,57 +38,50 @@ export default function FoodCategoriesPage() {
 
   // Mock data - replace with actual API calls
   useEffect(() => {
-    const mockCategories: FoodCategory[] = [
-      {
-        id: "1",
-        name: "Main Course",
-        description: "Primary dishes for a complete meal",
-        sort_order: 1,
-        is_active: true,
-        created_at: "2024-01-15T10:00:00Z",
-      },
-      {
-        id: "2",
-        name: "Sides",
-        description: "Complementary dishes to accompany main courses",
-        sort_order: 2,
-        is_active: true,
-        created_at: "2024-01-14T09:00:00Z",
-      },
-      {
-        id: "3",
-        name: "Salads",
-        description: "Fresh and healthy options",
-        sort_order: 3,
-        is_active: true,
-        created_at: "2024-01-13T08:00:00Z",
-      },
-      {
-        id: "4",
-        name: "Desserts",
-        description: "Sweet treats to finish your meal",
-        sort_order: 4,
-        is_active: false,
-        created_at: "2024-01-12T07:00:00Z",
-      },
-    ]
-
-    setTimeout(() => {
-      setCategories(mockCategories)
-      setLoading(false)
-    }, 1000)
-  }, [])
-
-  const handleDeleteCategory = async (categoryId: string) => {
+  const fetchCategories = async () => {
+    setLoading(true)
     try {
-      // Mock delete - replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      setCategories(categories.filter((category) => category.id !== categoryId))
-      toast.success("Category deleted successfully")
+      const res = await fetch("http://localhost:5000/api/food-categories", {
+        credentials: "include",
+      }) 
+      if (!res.ok) throw new Error("Failed to fetch categories")
+      const json = await res.json()
+      setCategories(json.data) // 👈 Assumes response is { data: [...] }
     } catch (error) {
-      toast.error("Failed to delete category")
+      console.error("Error fetching categories:", error)
+      toast.error("Failed to load categories")
+    } finally {
+      setLoading(false)
     }
   }
+
+  fetchCategories()
+}, [])
+
+
+  // const handleDeleteCategory = async (categoryId: string) => {
+  //   try {
+  //     // Mock delete - replace with actual API call
+  //     await new Promise((resolve) => setTimeout(resolve, 1000))
+  //     setCategories(categories.filter((category) => category.id !== categoryId))
+  //     toast.success("Category deleted successfully")
+  //   } catch (error) {
+  //     toast.error("Failed to delete category")
+  //   }
+  // }
+  const handleDeleteCategory = async (categoryId: string) => {
+  try {
+    const res = await fetch(`http://localhost:5000/api/food-categories/${categoryId}`, {
+      method: "DELETE",
+      credentials: "include",
+    })
+    if (!res.ok) throw new Error("Failed to delete")
+    setCategories(categories.filter((cat) => cat.id !== categoryId))
+    toast.success("Category deleted successfully")
+  } catch (err) {
+    toast.error("Failed to delete category")
+  }
+}
 
   const filteredCategories = categories.filter((category) =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase()),
