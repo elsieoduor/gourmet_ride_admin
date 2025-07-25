@@ -49,6 +49,7 @@ export default function EditBookingPage({ params }: PageProps) {
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
   const [users, setUsers] = useState<User[]>([])
+  const [selectedMenuItems, setSelectedMenuItems] = useState<any[]>([]); // or define a type
   const [trips, setTrips] = useState<Trip[]>([])
   const [bookingId, setBookingId] = useState<string>("")
   const [formData, setFormData] = useState<Booking>({
@@ -71,79 +72,158 @@ export default function EditBookingPage({ params }: PageProps) {
   }, [params])
 
   // Mock fetch users and trips - replace with actual API calls
+  // useEffect(() => {
+  //   const mockUsers: User[] = [
+  //     { id: "user1", first_name: "John", last_name: "Doe", email: "john@example.com" },
+  //     { id: "user2", first_name: "Jane", last_name: "Smith", email: "jane@example.com" },
+  //     { id: "user3", first_name: "Mike", last_name: "Johnson", email: "mike@example.com" },
+  //   ]
+
+  //   const mockTrips: Trip[] = [
+  //     {
+  //       id: "trip1",
+  //       route: { name: "City Center → Business District" },
+  //       scheduled_date: "2024-01-20",
+  //       scheduled_time: "12:30",
+  //     },
+  //     {
+  //       id: "trip2",
+  //       route: { name: "University → Shopping Mall" },
+  //       scheduled_date: "2024-01-21",
+  //       scheduled_time: "14:00",
+  //     },
+  //   ]
+
+  //   setUsers(mockUsers)
+  //   setTrips(mockTrips)
+  // }, [])
+
+  // useEffect(() => {
+  //   if (!bookingId) return
+
+  //   // Mock API call to fetch booking data - replace with actual implementation
+  //   const fetchBooking = async () => {
+  //     try {
+  //       await new Promise((resolve) => setTimeout(resolve, 1000))
+
+  //       // Mock booking data
+  //       const mockBooking: Booking = {
+  //         id: bookingId,
+  //         user_id: "user1",
+  //         trip_id: "trip1",
+  //         number_of_passengers: 2,
+  //         total_amount: 2000,
+  //         status: "confirmed",
+  //         special_requests: "Window seat preferred",
+  //         payment_status: "paid",
+  //       }
+
+  //       setFormData(mockBooking)
+  //     } catch (error) {
+  //       toast.error("Failed to load booking data")
+  //     } finally {
+  //       setInitialLoading(false)
+  //     }
+  //   }
+
+  //   fetchBooking()
+  // }, [bookingId])
+
   useEffect(() => {
-    const mockUsers: User[] = [
-      { id: "user1", first_name: "John", last_name: "Doe", email: "john@example.com" },
-      { id: "user2", first_name: "Jane", last_name: "Smith", email: "jane@example.com" },
-      { id: "user3", first_name: "Mike", last_name: "Johnson", email: "mike@example.com" },
-    ]
-
-    const mockTrips: Trip[] = [
-      {
-        id: "trip1",
-        route: { name: "City Center → Business District" },
-        scheduled_date: "2024-01-20",
-        scheduled_time: "12:30",
-      },
-      {
-        id: "trip2",
-        route: { name: "University → Shopping Mall" },
-        scheduled_date: "2024-01-21",
-        scheduled_time: "14:00",
-      },
-    ]
-
-    setUsers(mockUsers)
-    setTrips(mockTrips)
-  }, [])
-
-  useEffect(() => {
+  const fetchData = async () => {
     if (!bookingId) return
-
-    // Mock API call to fetch booking data - replace with actual implementation
-    const fetchBooking = async () => {
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        // Mock booking data
-        const mockBooking: Booking = {
-          id: bookingId,
-          user_id: "user1",
-          trip_id: "trip1",
-          number_of_passengers: 2,
-          total_amount: 2000,
-          status: "confirmed",
-          special_requests: "Window seat preferred",
-          payment_status: "paid",
-        }
-
-        setFormData(mockBooking)
-      } catch (error) {
-        toast.error("Failed to load booking data")
-      } finally {
-        setInitialLoading(false)
-      }
-    }
-
-    fetchBooking()
-  }, [bookingId])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
     setLoading(true)
-
     try {
-      // Mock API call - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const res = await fetch(`http://localhost:5000/api/bookings/${bookingId}`, {
+        credentials: "include",
+      })
 
-      toast.success("Booking updated successfully")
-      router.push("/admin/bookings")
-    } catch (error) {
-      toast.error("Failed to update booking")
+      if (!res.ok) {
+        console.error("❌ Failed to fetch booking:", res.statusText)
+        return
+      }
+
+      const { data } = await res.json()
+      console.log("✅ Booking fetched:", data)
+
+      const booking = data
+
+      // Update form data
+      setFormData({
+        id: booking.id,
+        user_id: booking.user?.id || "",
+        trip_id: booking.trip?.id || "",
+        number_of_passengers: booking.party_size || 1,
+        total_amount: booking.total_amount || 0,
+        status: booking.status || "pending",
+        special_requests: booking.special_requests || "",
+        payment_status: booking.payment_status || "pending",
+      })
+
+      // Set users/trips for dropdowns (assuming booking has the data populated)
+      const userList = booking.user ? [booking.user] : []
+      const tripList = booking.trip ? [booking.trip] : []
+
+      setUsers(userList)
+      setTrips(tripList)
+
+    } catch (err) {
+      console.error("❌ Error fetching booking:", err)
     } finally {
       setLoading(false)
+      setInitialLoading(false)
     }
   }
+
+  fetchData()
+}, [bookingId])
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    const response = await fetch(`http://localhost:5000/api/bookings/${bookingId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        bookingData: {
+          user_id: formData.user_id,
+          trip_id: formData.trip_id,
+          party_size: formData.number_of_passengers,
+          total_amount: formData.total_amount,
+          status: formData.status,
+          payment_status: formData.payment_status,
+          special_requests: formData.special_requests,
+        },
+        booking_menu_items: selectedMenuItems.map((item) => ({
+          menu_item_id: item.menu_item.id,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          special_instructions: item.special_instructions || null,
+          table_number: item.table_number || null,
+        })),
+      }),
+    });
+
+    if (!response.ok) {
+      const serverError = await response.text();
+      throw new Error(serverError || "Failed to update booking");
+    }
+
+    toast.success("✅ Booking updated successfully!");
+    router.push("/admin/bookings");
+  } catch (error: any) {
+    console.error("❌ Update failed:", error);
+    toast.error("Failed to update booking: " + error.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleInputChange = (field: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -287,6 +367,77 @@ export default function EditBookingPage({ params }: PageProps) {
                 rows={3}
               />
             </div>
+            <div className="space-y-4 pt-2">
+            <h3 className="text-lg font-medium text-[#2C3E50]">Booking Menu</h3>
+            {selectedMenuItems.length === 0 && (
+              <p className="text-sm text-gray-500 italic">No menu items selected.</p>
+            )}
+
+            {selectedMenuItems.map((item, index) => (
+              <div
+                key={index}
+                className="border rounded p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50"
+              >
+                <div>
+                  <Label>Item</Label>
+                  <Input disabled value={item.menu_item.name} />
+                </div>
+
+                <div>
+                  <Label>Quantity</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={item.quantity}
+                    onChange={(e) => {
+                      const updated = [...selectedMenuItems]
+                      updated[index].quantity = Number(e.target.value)
+                      setSelectedMenuItems(updated)
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <Label>Unit Price</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={item.unit_price}
+                    onChange={(e) => {
+                      const updated = [...selectedMenuItems]
+                      updated[index].unit_price = Number(e.target.value)
+                      setSelectedMenuItems(updated)
+                    }}
+                  />
+                </div>
+
+      <div>
+        <Label>Special Instructions</Label>
+        <Input
+          value={item.special_instructions || ""}
+          onChange={(e) => {
+            const updated = [...selectedMenuItems]
+            updated[index].special_instructions = e.target.value
+            setSelectedMenuItems(updated)
+          }}
+        />
+      </div>
+
+      <div>
+        <Label>Table Number</Label>
+        <Input
+          value={item.table_number || ""}
+          onChange={(e) => {
+            const updated = [...selectedMenuItems]
+            updated[index].table_number = e.target.value
+            setSelectedMenuItems(updated)
+          }}
+        />
+      </div>
+    </div>
+  ))}
+</div>
+
 
             <div className="flex gap-4 pt-4">
               <Button type="submit" disabled={loading} className="bg-[#27AE60] hover:bg-[#229954]">
