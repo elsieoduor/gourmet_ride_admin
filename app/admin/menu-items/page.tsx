@@ -35,101 +35,163 @@ interface MenuItem {
   is_available: boolean
   preparation_time: number
   sort_order: number
-  category: {
+  food_categories: {
     id: string
     name: string
   }
   created_at: string
   updated_at: string
 }
+type FoodCategory = {
+  id: string;
+  name: string;
+};
+
 
 export default function MenuItemsPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
+  const [uniqueCategories, setUniqueCategories] = useState<{ id: string; name: string }[]>([])
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [availabilityFilter, setAvailabilityFilter] = useState<string>("all")
 
   // Mock data - replace with actual API calls
-  useEffect(() => {
-    const mockMenuItems: MenuItem[] = [
-      {
-        id: "1",
-        category_id: "cat1",
-        name: "Gourmet Burger",
-        description: "Premium beef patty with artisan toppings",
-        price: 800,
-        ingredients: ["Beef", "Lettuce", "Tomato", "Cheese", "Bun"],
-        allergens: ["Gluten", "Dairy"],
-        is_vegetarian: false,
-        is_vegan: false,
-        is_available: true,
-        preparation_time: 15,
-        sort_order: 1,
-        category: { id: "cat1", name: "Main Course" },
-        created_at: "2024-01-15T10:00:00Z",
-        updated_at: "2024-01-15T10:00:00Z",
-      },
-      {
-        id: "2",
-        category_id: "cat2",
-        name: "Truffle Fries",
-        description: "Hand-cut fries with truffle oil and parmesan",
-        price: 400,
-        ingredients: ["Potatoes", "Truffle Oil", "Parmesan", "Salt"],
-        allergens: ["Dairy"],
-        is_vegetarian: true,
-        is_vegan: false,
-        is_available: true,
-        preparation_time: 10,
-        sort_order: 1,
-        category: { id: "cat2", name: "Sides" },
-        created_at: "2024-01-14T09:00:00Z",
-        updated_at: "2024-01-14T09:00:00Z",
-      },
-      {
-        id: "3",
-        category_id: "cat3",
-        name: "Vegan Salad Bowl",
-        description: "Fresh mixed greens with quinoa and tahini dressing",
-        price: 600,
-        ingredients: ["Mixed Greens", "Quinoa", "Chickpeas", "Tahini"],
-        allergens: ["Sesame"],
-        is_vegetarian: true,
-        is_vegan: true,
-        is_available: false,
-        preparation_time: 8,
-        sort_order: 1,
-        category: { id: "cat3", name: "Salads" },
-        created_at: "2024-01-13T08:00:00Z",
-        updated_at: "2024-01-13T08:00:00Z",
-      },
-    ]
+  // useEffect(() => {
+  //   const mockMenuItems: MenuItem[] = [
+  //     {
+  //       id: "1",
+  //       category_id: "cat1",
+  //       name: "Gourmet Burger",
+  //       description: "Premium beef patty with artisan toppings",
+  //       price: 800,
+  //       ingredients: ["Beef", "Lettuce", "Tomato", "Cheese", "Bun"],
+  //       allergens: ["Gluten", "Dairy"],
+  //       is_vegetarian: false,
+  //       is_vegan: false,
+  //       is_available: true,
+  //       preparation_time: 15,
+  //       sort_order: 1,
+  //       category: { id: "cat1", name: "Main Course" },
+  //       created_at: "2024-01-15T10:00:00Z",
+  //       updated_at: "2024-01-15T10:00:00Z",
+  //     },
+  //     {
+  //       id: "2",
+  //       category_id: "cat2",
+  //       name: "Truffle Fries",
+  //       description: "Hand-cut fries with truffle oil and parmesan",
+  //       price: 400,
+  //       ingredients: ["Potatoes", "Truffle Oil", "Parmesan", "Salt"],
+  //       allergens: ["Dairy"],
+  //       is_vegetarian: true,
+  //       is_vegan: false,
+  //       is_available: true,
+  //       preparation_time: 10,
+  //       sort_order: 1,
+  //       category: { id: "cat2", name: "Sides" },
+  //       created_at: "2024-01-14T09:00:00Z",
+  //       updated_at: "2024-01-14T09:00:00Z",
+  //     },
+  //     {
+  //       id: "3",
+  //       category_id: "cat3",
+  //       name: "Vegan Salad Bowl",
+  //       description: "Fresh mixed greens with quinoa and tahini dressing",
+  //       price: 600,
+  //       ingredients: ["Mixed Greens", "Quinoa", "Chickpeas", "Tahini"],
+  //       allergens: ["Sesame"],
+  //       is_vegetarian: true,
+  //       is_vegan: true,
+  //       is_available: false,
+  //       preparation_time: 8,
+  //       sort_order: 1,
+  //       category: { id: "cat3", name: "Salads" },
+  //       created_at: "2024-01-13T08:00:00Z",
+  //       updated_at: "2024-01-13T08:00:00Z",
+  //     },
+  //   ]
 
-    setTimeout(() => {
-      setMenuItems(mockMenuItems)
-      setLoading(false)
-    }, 1000)
-  }, [])
+  //   setTimeout(() => {
+  //     setMenuItems(mockMenuItems)
+  //     setLoading(false)
+  //   }, 1000)
+  // }, [])
+  useEffect(() => {
+  const fetchMenuItems = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/menu", {
+        credentials: "include",
+      });
+
+      const data = await res.json();
+      console.log("Menu items fetched:", data);
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to fetch menu items");
+      }
+
+      const items = data.data.items;
+      setMenuItems(items);
+
+      // Extract unique categories from menuItems
+      const unique = Array.from(
+        new Map(
+          items
+            .filter((item: MenuItem) => item.food_categories)
+            .map((item: MenuItem) => [item.food_categories.id, item.food_categories])
+        ).values()
+      ) as FoodCategory[];
+
+      setUniqueCategories(unique);
+    } catch (error) {
+      console.error("Fetch error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchMenuItems();
+}, []);
+
+
 
   const handleDeleteMenuItem = async (itemId: string) => {
-    // Mock delete - replace with actual API call
-    setMenuItems(menuItems.filter((item) => item.id !== itemId))
-  }
+    try {
+      const res = await fetch(`http://localhost:5000/api/menu/${itemId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
-  const filteredMenuItems = menuItems.filter((item) => {
-    const matchesSearch =
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      const data = await res.json();
 
-    const matchesCategory = categoryFilter === "all" || item.category_id === categoryFilter
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to delete item");
+      }
+
+      setMenuItems((prev) => prev.filter((item) => item.id !== itemId));
+    } catch (error) {
+      console.error("Delete error:", error);
+    }
+  };
+
+
+  const filteredMenuItems = Array.isArray(menuItems) ? menuItems.filter((item) => {
+    const name = item?.name?.toLowerCase?.() || "";
+    const description = item?.description?.toLowerCase?.() || "";
+    const matchesSearch = name.includes(searchTerm.toLowerCase()) || description.includes(searchTerm.toLowerCase());
+
+    const itemCategoryId = item?.food_categories?.id;
+    const matchesCategory =categoryFilter === "all" || itemCategoryId === categoryFilter;
+
+    const isAvailable = item?.is_available;
     const matchesAvailability =
-      availabilityFilter === "all" ||
-      (availabilityFilter === "available" && item.is_available) ||
-      (availabilityFilter === "unavailable" && !item.is_available)
+          availabilityFilter === "all" ||
+          (availabilityFilter === "available" && isAvailable) ||
+          (availabilityFilter === "unavailable" && !isAvailable);
 
-    return matchesSearch && matchesCategory && matchesAvailability
-  })
+        return matchesSearch && matchesCategory && matchesAvailability;
+    }) : [];
 
   if (loading) {
     return (
@@ -179,10 +241,13 @@ export default function MenuItemsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="cat1">Main Course</SelectItem>
-                  <SelectItem value="cat2">Sides</SelectItem>
-                  <SelectItem value="cat3">Salads</SelectItem>
+                  {uniqueCategories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
+
               </Select>
               <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
                 <SelectTrigger className="w-40">
@@ -233,7 +298,7 @@ export default function MenuItemsPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{item.category.name}</Badge>
+                    <Badge variant="outline">{item.food_categories?.name}</Badge>
                   </TableCell>
                   <TableCell>
                     <span className="font-medium">KSH {item.price}</span>
