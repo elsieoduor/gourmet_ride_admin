@@ -36,47 +36,82 @@ export default function PickupLocationsPage() {
   const [searchTerm, setSearchTerm] = useState("")
 
   // Mock data - replace with actual API calls
-  useEffect(() => {
-    const mockLocations: PickupLocation[] = [
-      {
-        id: "1",
-        name: "City Center",
-        address: "Main Street, Downtown Nairobi",
-        latitude: -1.2864,
-        longitude: 36.8172,
-        is_active: true,
-        created_at: "2024-01-15T10:00:00Z",
-      },
-      {
-        id: "2",
-        name: "University Campus",
-        address: "University Way, Nairobi",
-        latitude: -1.2966,
-        longitude: 36.8083,
-        is_active: true,
-        created_at: "2024-01-14T09:00:00Z",
-      },
-      {
-        id: "3",
-        name: "Shopping Mall",
-        address: "Westlands Mall, Westlands",
-        latitude: -1.263,
-        longitude: 36.8063,
-        is_active: false,
-        created_at: "2024-01-13T08:00:00Z",
-      },
-    ]
+  // useEffect(() => {
+  //   const mockLocations: PickupLocation[] = [
+  //     {
+  //       id: "1",
+  //       name: "City Center",
+  //       address: "Main Street, Downtown Nairobi",
+  //       latitude: -1.2864,
+  //       longitude: 36.8172,
+  //       is_active: true,
+  //       created_at: "2024-01-15T10:00:00Z",
+  //     },
+  //     {
+  //       id: "2",
+  //       name: "University Campus",
+  //       address: "University Way, Nairobi",
+  //       latitude: -1.2966,
+  //       longitude: 36.8083,
+  //       is_active: true,
+  //       created_at: "2024-01-14T09:00:00Z",
+  //     },
+  //     {
+  //       id: "3",
+  //       name: "Shopping Mall",
+  //       address: "Westlands Mall, Westlands",
+  //       latitude: -1.263,
+  //       longitude: 36.8063,
+  //       is_active: false,
+  //       created_at: "2024-01-13T08:00:00Z",
+  //     },
+  //   ]
 
-    setTimeout(() => {
-      setLocations(mockLocations)
-      setLoading(false)
-    }, 1000)
+  //   setTimeout(() => {
+  //     setLocations(mockLocations)
+  //     setLoading(false)
+  //   }, 1000)
+  // }, [])
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/pickup-locations", {
+          credentials: "include", 
+        })
+        const json = await res.json()
+
+        if (!res.ok || !json.success) {
+          throw new Error(json.error || "Failed to fetch pickup locations")
+        }
+
+        setLocations(json.data) 
+      } catch (err) {
+        console.error("Error fetching pickup locations:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchLocations()
   }, [])
 
   const handleDeleteLocation = async (locationId: string) => {
-    // Mock delete - replace with actual API call
-    setLocations(locations.filter((location) => location.id !== locationId))
+  try {
+    const res = await fetch(`http://localhost:5000/api/pickup-locations/${locationId}`, {
+      method: "DELETE",
+      credentials: "include",
+    })
+    const json = await res.json()
+
+    if (!res.ok || !json.success) {
+      throw new Error(json.error || "Failed to delete location")
+    }
+
+    setLocations((prev) => prev.filter((loc) => loc.id !== locationId))
+  } catch (err) {
+    console.error("Delete error:", err)
   }
+}
 
   const filteredLocations = locations.filter(
     (location) =>
