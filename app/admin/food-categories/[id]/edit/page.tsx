@@ -49,23 +49,43 @@ export default function EditFoodCategoryPage({ params }: PageProps) {
       getParams()
     }, [params])
 
+  // useEffect(() => {
+  //   // Mock API call to fetch category data - replace with actual implementation
+  //   const fetchCategory = async () => {
+  //     try {
+  //       await new Promise((resolve) => setTimeout(resolve, 1000))
+
+  //       // Mock category data
+  //       const mockCategory: FoodCategory = {
+  //         id: foodId,
+  //         name: "Main Course",
+  //         description: "Primary dishes for a complete meal",
+  //         image_url: "",
+  //         sort_order: 1,
+  //         is_active: true,
+  //       }
+
+  //       setFormData(mockCategory)
+  //     } catch (error) {
+  //       toast.error("Failed to load category data")
+  //     } finally {
+  //       setInitialLoading(false)
+  //     }
+  //   }
+
+  //   fetchCategory()
+  // }, [foodId])
   useEffect(() => {
-    // Mock API call to fetch category data - replace with actual implementation
     const fetchCategory = async () => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        const res = await fetch(`http://localhost:5000/api/food-categories/${foodId}`,{
+          credentials: "include",
+        })
+        if (!res.ok) throw new Error("Failed to fetch category")
 
-        // Mock category data
-        const mockCategory: FoodCategory = {
-          id: foodId,
-          name: "Main Course",
-          description: "Primary dishes for a complete meal",
-          image_url: "",
-          sort_order: 1,
-          is_active: true,
-        }
-
-        setFormData(mockCategory)
+        const json = await res.json()
+        console.log(json.data)
+        setFormData(json.data)
       } catch (error) {
         toast.error("Failed to load category data")
       } finally {
@@ -76,19 +96,31 @@ export default function EditFoodCategoryPage({ params }: PageProps) {
     fetchCategory()
   }, [foodId])
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      // Mock API call - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const res = await fetch(`http://localhost:5000/api/food-categories/${foodId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(formData),
+      })
+
+      if (!res.ok) {
+        const errData = await res.json()
+        throw new Error(errData.message || "Failed to update category")
+      }
+      console.log(res)
 
       toast.success("Food category updated successfully")
-
       router.push("/admin/food-categories")
-    } catch (error) {
-      toast.error("Failed to update food category")
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update food category")
     } finally {
       setLoading(false)
     }
