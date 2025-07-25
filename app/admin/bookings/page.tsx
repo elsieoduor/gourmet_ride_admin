@@ -47,80 +47,105 @@ export default function BookingsPage() {
   const [currentPage, setCurrentPage] = useState(1)
 
   // Mock data - replace with actual API calls
+  // useEffect(() => {
+  //   const mockBookings: Booking[] = [
+  //     {
+  //       id: "1",
+  //       user: {
+  //         id: "user1",
+  //         first_name: "John",
+  //         last_name: "Doe",
+  //         email: "john@example.com",
+  //       },
+  //       trip: {
+  //         id: "trip1",
+  //         scheduled_date: "2024-01-20",
+  //         scheduled_time: "12:30",
+  //         route: {
+  //           name: "City Center → Business District",
+  //           pickup_location: { name: "City Center" },
+  //           dropoff_location: { name: "Business District" },
+  //         },
+  //       },
+  //       party_size: 2,
+  //       total_amount: 2200,
+  //       status: "confirmed",
+  //       qr_code: "QR123456",
+  //       booked_at: "2024-01-15T10:00:00Z",
+  //       booking_menu_items: [
+  //         { menu_item: { name: "Gourmet Burger" }, quantity: 2 },
+  //         { menu_item: { name: "Truffle Fries" }, quantity: 1 },
+  //       ],
+  //     },
+  //     {
+  //       id: "2",
+  //       user: {
+  //         id: "user2",
+  //         first_name: "Jane",
+  //         last_name: "Smith",
+  //         email: "jane@example.com",
+  //       },
+  //       trip: {
+  //         id: "trip2",
+  //         scheduled_date: "2024-01-21",
+  //         scheduled_time: "18:00",
+  //         route: {
+  //           name: "University → Shopping Mall",
+  //           pickup_location: { name: "University Campus" },
+  //           dropoff_location: { name: "Shopping Mall" },
+  //         },
+  //       },
+  //       party_size: 1,
+  //       total_amount: 1400,
+  //       status: "pending",
+  //       qr_code: "QR789012",
+  //       booked_at: "2024-01-16T14:30:00Z",
+  //       booking_menu_items: [{ menu_item: { name: "Vegan Salad Bowl" }, quantity: 1 }],
+  //     },
+  //   ]
+
+  //   setTimeout(() => {
+  //     setBookings(mockBookings)
+  //     setLoading(false)
+  //   }, 1000)
+  // }, [currentPage, statusFilter, searchTerm])
   useEffect(() => {
-    const mockBookings: Booking[] = [
-      {
-        id: "1",
-        user: {
-          id: "user1",
-          first_name: "John",
-          last_name: "Doe",
-          email: "john@example.com",
-        },
-        trip: {
-          id: "trip1",
-          scheduled_date: "2024-01-20",
-          scheduled_time: "12:30",
-          route: {
-            name: "City Center → Business District",
-            pickup_location: { name: "City Center" },
-            dropoff_location: { name: "Business District" },
-          },
-        },
-        party_size: 2,
-        total_amount: 2200,
-        status: "confirmed",
-        qr_code: "QR123456",
-        booked_at: "2024-01-15T10:00:00Z",
-        booking_menu_items: [
-          { menu_item: { name: "Gourmet Burger" }, quantity: 2 },
-          { menu_item: { name: "Truffle Fries" }, quantity: 1 },
-        ],
-      },
-      {
-        id: "2",
-        user: {
-          id: "user2",
-          first_name: "Jane",
-          last_name: "Smith",
-          email: "jane@example.com",
-        },
-        trip: {
-          id: "trip2",
-          scheduled_date: "2024-01-21",
-          scheduled_time: "18:00",
-          route: {
-            name: "University → Shopping Mall",
-            pickup_location: { name: "University Campus" },
-            dropoff_location: { name: "Shopping Mall" },
-          },
-        },
-        party_size: 1,
-        total_amount: 1400,
-        status: "pending",
-        qr_code: "QR789012",
-        booked_at: "2024-01-16T14:30:00Z",
-        booking_menu_items: [{ menu_item: { name: "Vegan Salad Bowl" }, quantity: 1 }],
-      },
-    ]
-
-    setTimeout(() => {
-      setBookings(mockBookings)
-      setLoading(false)
-    }, 1000)
-  }, [currentPage, statusFilter, searchTerm])
-
+      const fetchUsers = async () => {
+        setLoading(true)
+        try {
+          const res = await fetch("http://localhost:5000/api/bookings", {
+            credentials: "include", // 🔑 Important if cookie-based auth is used
+          })
+  
+          if (!res.ok) {
+            console.error("❌ Failed to fetch bookings:", res.statusText)
+            return
+          }
+  
+          const data = await res.json()
+          console.log("✅ Bookings fetched:", data.data)
+          setBookings(data.data)
+        } catch (err) {
+          console.error("❌ Error fetching bookings:", err)
+        } finally {
+          setLoading(false)
+        }
+      }
+  
+      fetchUsers()
+    }, [])
   const filteredBookings = bookings.filter((booking) => {
-    const matchesSearch =
-      booking.user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.user.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.qr_code.toLowerCase().includes(searchTerm.toLowerCase())
+  const matchesSearch =
+    (booking.user?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     booking.user?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     booking.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     booking.qr_code?.toLowerCase().includes(searchTerm.toLowerCase()))
 
-    const matchesStatus = statusFilter === "all" || booking.status === statusFilter
+  const matchesStatus = statusFilter === "all" || booking.status === statusFilter
 
-    return matchesSearch && matchesStatus
-  })
+  return matchesSearch && matchesStatus
+})
+
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -215,9 +240,9 @@ export default function BookingsPage() {
                   <TableCell>
                     <div>
                       <div className="font-medium text-[#2C3E50]">
-                        {booking.user.first_name} {booking.user.last_name}
+                        {booking.user?.first_name} {booking.user?.last_name}
                       </div>
-                      <div className="text-sm text-[#7F8C8D]">{booking.user.email}</div>
+                      <div className="text-sm text-[#7F8C8D]">{booking.user?.email}</div>
                       <div className="text-xs text-[#7F8C8D] mt-1">QR: {booking.qr_code}</div>
                     </div>
                   </TableCell>
