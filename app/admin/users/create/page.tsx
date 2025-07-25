@@ -18,7 +18,6 @@ export default function CreateUserPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
-    clerk_id: "",
     username: "",
     email: "",
     first_name: "",
@@ -29,22 +28,35 @@ export default function CreateUserPage() {
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      // Mock API call - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+  try {
+    const res = await fetch("http://localhost:5000/api/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(formData),
+    });
 
-      toast.success("User created successfully")
+    const data = await res.json();
 
-      router.push("/admin/users")
-    } catch (error) {
-      toast.error("Failed to create user")
-    } finally {
-      setLoading(false)
+    if (!res.ok) {
+      throw new Error(data.error || "Failed to create user");
     }
+
+    toast.success("User created successfully");
+    router.push("/admin/users");
+  } catch (error: any) {
+    console.error("❌ Error creating user:", error);
+    toast.error(error.message || "Failed to create user");
+  } finally {
+    setLoading(false);
   }
+};
+
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -123,17 +135,6 @@ export default function CreateUserPage() {
                 value={formData.phone}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
                 placeholder="+254 700 000 000"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="clerk_id">Clerk ID *</Label>
-              <Input
-                id="clerk_id"
-                value={formData.clerk_id}
-                onChange={(e) => handleInputChange("clerk_id", e.target.value)}
-                placeholder="Clerk authentication ID"
-                required
               />
             </div>
 
