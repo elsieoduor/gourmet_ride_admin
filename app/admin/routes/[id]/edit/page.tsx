@@ -51,17 +51,71 @@ export default function EditRoutePage({ params }: PageProps) {
   })
 
   // Mock fetch locations - replace with actual API call
-  useEffect(() => {
-    const mockLocations: PickupLocation[] = [
-      { id: "loc1", name: "City Center" },
-      { id: "loc2", name: "Business District" },
-      { id: "loc3", name: "University Campus" },
-      { id: "loc4", name: "Shopping Mall" },
-      { id: "loc5", name: "Residential Area A" },
-    ]
+  // useEffect(() => {
+  //   const mockLocations: PickupLocation[] = [
+  //     { id: "loc1", name: "City Center" },
+  //     { id: "loc2", name: "Business District" },
+  //     { id: "loc3", name: "University Campus" },
+  //     { id: "loc4", name: "Shopping Mall" },
+  //     { id: "loc5", name: "Residential Area A" },
+  //   ]
 
-    setLocations(mockLocations)
-  }, [])
+  //   setLocations(mockLocations)
+  // }, [])
+
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/pickup-locations", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to fetch locations");
+        }
+
+        setLocations(data.data); // assuming API returns [{ id, name }, ...]
+      } catch (error: any) {
+        console.error("❌ Error fetching locations:", error);
+        toast.error(error.message || "Failed to load locations");
+      }
+    };
+
+    fetchLocations();
+  }, []);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/routes/${routeId}`, {
+          credentials: "include",
+        })
+  
+        const json = await res.json()
+  
+        if (!res.ok || !json.success || !json.data) {
+          throw new Error(json.error || "Failed to fetch route")
+        }
+  
+        // Set form state with user data
+        setFormData(json.data)
+        console.log("Fetched route:", json.data)
+      } catch (error) {
+        console.error("Fetch error:", error)
+        toast.error("Failed to load route data")
+      } finally {
+        setInitialLoading(false)
+      }
+    }
+  
+    if (routeId) {
+      fetchUser()
+    }
+  }, [routeId])
+
   useEffect(() => {
       const getParams = async () => {
         const resolvedParams = await params
@@ -70,59 +124,67 @@ export default function EditRoutePage({ params }: PageProps) {
       getParams()
     }, [params])
 
-  useEffect(() => {
-    // Mock API call to fetch route data - replace with actual implementation
-    const fetchRoute = async () => {
+
+  // useEffect(() => {
+  //   // Mock API call to fetch route data - replace with actual implementation
+  //   const fetchRoute = async () => {
+  //     try {
+  //       await new Promise((resolve) => setTimeout(resolve, 1000))
+
+  //       // Mock route data
+  //       const mockRoute: Route = {
+  //         id: routeId,
+  //         name: "City Center to Business District",
+  //         pickup_location_id: "loc1",
+  //         dropoff_location_id: "loc2",
+  //         duration_minutes: 30,
+  //         price_per_person: 1000,
+  //         max_capacity: 15,
+  //         is_active: true,
+  //       }
+
+  //       setFormData(mockRoute)
+  //     } catch (error) {
+  //       toast.error("Failed to load route data")
+  //     } finally {
+  //       setInitialLoading(false)
+  //     }
+  //   }
+
+  //   fetchRoute()
+  // }, [routeId])
+
+  
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault()
+      setLoading(true)
+  
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        // Mock route data
-        const mockRoute: Route = {
-          id: routeId,
-          name: "City Center to Business District",
-          pickup_location_id: "loc1",
-          dropoff_location_id: "loc2",
-          duration_minutes: 30,
-          price_per_person: 1000,
-          max_capacity: 15,
-          is_active: true,
+        const res = await fetch(`http://localhost:5000/api/routes/${formData.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(formData),
+        })
+  
+        const data = await res.json()
+        console.log(data)
+  
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to update routes")
         }
-
-        setFormData(mockRoute)
-      } catch (error) {
-        toast.error("Failed to load route data")
+  
+        toast.success("Route updated successfully")
+        router.push("/admin/routes")
+      } catch (error: any) {
+        toast.error(error.message || "Failed to update route")
       } finally {
-        setInitialLoading(false)
-      }
-    }
-
-    fetchRoute()
-  }, [routeId])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-
-    try {
-      // Validate that pickup and dropoff are different
-      if (formData.pickup_location_id === formData.dropoff_location_id) {
-        toast.error("Pickup and drop-off locations cannot be the same")
         setLoading(false)
-        return
       }
-
-      // Mock API call - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      toast.success("Route updated successfully")
-
-      router.push("/admin/routes")
-    } catch (error) {
-      toast.error("Failed to update route")
-    } finally {
-      setLoading(false)
     }
-  }
+  
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
