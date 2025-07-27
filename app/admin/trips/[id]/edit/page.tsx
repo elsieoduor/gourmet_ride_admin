@@ -13,6 +13,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Save, Calendar } from "lucide-react"
 import { toast } from "sonner"
 
+interface Trip {
+  id: string
+  routes: {
+    id: string
+    name: string
+    pickup_locations: { name: string }
+    dropoff_locations: { name: string }
+  }
+  drivers: {
+    id: string
+    first_name: string
+    last_name: string
+  }
+  scheduled_date: string
+  scheduled_time: string
+  status: "scheduled" | "in_progress" | "completed" | "cancelled"
+  current_capacity: number
+  max_capacity: number
+  notes?: string
+  created_at: string
+}
+
 interface Route {
   id: string
   name: string
@@ -24,57 +46,35 @@ interface Driver {
   last_name: string
 }
 
-interface Trip {
-  id: string
-  route_id: string
-  driver_id: string
-  scheduled_date: string
-  scheduled_time: string
-  status: "scheduled" | "in_progress" | "completed" | "cancelled"
-  current_capacity: number
-  max_capacity: number
-  notes?: string
-}
 interface PageProps {
   params: Promise<{ id: string }>
 }
-
 
 export default function EditTripPage({ params }: PageProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
   const [tripId, setTripId] = useState<string>("")
+  const [formData, setFormData] = useState<Partial<Trip> & { route_id?: string; driver_id?: string }>({})
   const [routes, setRoutes] = useState<Route[]>([])
   const [drivers, setDrivers] = useState<Driver[]>([])
-  const [formData, setFormData] = useState<Trip>({
-    id: "",
-    route_id: "",
-    driver_id: "",
-    scheduled_date: "",
-    scheduled_time: "",
-    status: "scheduled",
-    current_capacity: 0,
-    max_capacity: 15,
-    notes: "",
-  })
 
   // Mock fetch routes and drivers - replace with actual API calls
-  useEffect(() => {
-    const mockRoutes: Route[] = [
-      { id: "route1", name: "City Center → Business District" },
-      { id: "route2", name: "University → Shopping Mall" },
-      { id: "route3", name: "Shopping Mall → Residential Area" },
-    ]
+  // useEffect(() => {
+  //   const mockRoutes: Route[] = [
+  //     { id: "route1", name: "City Center → Business District" },
+  //     { id: "route2", name: "University → Shopping Mall" },
+  //     { id: "route3", name: "Shopping Mall → Residential Area" },
+  //   ]
 
-    const mockDrivers: Driver[] = [
-      { id: "driver1", first_name: "James", last_name: "Mwangi" },
-      { id: "driver2", first_name: "Mary", last_name: "Wanjiku" },
-    ]
+  //   const mockDrivers: Driver[] = [
+  //     { id: "driver1", first_name: "James", last_name: "Mwangi" },
+  //     { id: "driver2", first_name: "Mary", last_name: "Wanjiku" },
+  //   ]
 
-    setRoutes(mockRoutes)
-    setDrivers(mockDrivers)
-  }, [])
+  //   setRoutes(mockRoutes)
+  //   setDrivers(mockDrivers)
+  // }, [])
 
   useEffect(() => {
       const getParams = async () => {
@@ -84,53 +84,133 @@ export default function EditTripPage({ params }: PageProps) {
       getParams()
     }, [params])
 
+  // useEffect(() => {
+  //   // Mock API call to fetch trip data - replace with actual implementation
+  //   const fetchTrip = async () => {
+  //     try {
+  //       await new Promise((resolve) => setTimeout(resolve, 1000))
+
+  //       // Mock trip data
+  //       const mockTrip: Trip = {
+  //         id: tripId,
+  //         route_id: "route1",
+  //         driver_id: "driver1",
+  //         scheduled_date: "2024-01-20",
+  //         scheduled_time: "12:30",
+  //         status: "scheduled",
+  //         current_capacity: 8,
+  //         max_capacity: 15,
+  //         notes: "Regular weekday trip",
+  //       }
+
+  //       setFormData(mockTrip)
+  //     } catch (error) {
+  //       toast.error("Failed to load trip data")
+  //     } finally {
+  //       setInitialLoading(false)
+  //     }
+  //   }
+
+  //   fetchTrip()
+  // }, [tripId])
+
   useEffect(() => {
-    // Mock API call to fetch trip data - replace with actual implementation
-    const fetchTrip = async () => {
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        // Mock trip data
-        const mockTrip: Trip = {
-          id: tripId,
-          route_id: "route1",
-          driver_id: "driver1",
-          scheduled_date: "2024-01-20",
-          scheduled_time: "12:30",
-          status: "scheduled",
-          current_capacity: 8,
-          max_capacity: 15,
-          notes: "Regular weekday trip",
-        }
-
-        setFormData(mockTrip)
-      } catch (error) {
-        toast.error("Failed to load trip data")
-      } finally {
-        setInitialLoading(false)
-      }
-    }
-
-    fetchTrip()
-  }, [tripId])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-
+  const fetchTrip = async () => {
     try {
-      // Mock API call - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const res = await fetch(`http://localhost:5000/api/trips/${tripId}`, {
+        credentials: "include",
+      })
+      if (!res.ok) throw new Error("Trip not found")
+      const tripData = await res.json()
 
-      toast.success("Trip updated successfully")
-
-      router.push("/admin/trips")
-    } catch (error) {
-      toast.error("Failed to update trip")
+      // Set form data using correct IDs
+      setFormData({
+        ...tripData.data,
+        route_id: tripData.data.routes?.id,
+        driver_id: tripData.data.drivers?.id,
+      })
+      console.log(tripData)
+    } catch (err) {
+      toast.error("Failed to fetch trip")
+      console.error(err)
     } finally {
-      setLoading(false)
+      setInitialLoading(false)
     }
   }
+
+  const fetchRoutesAndDrivers = async () => {
+    try {
+      const [routesRes, driversRes] = await Promise.all([
+        fetch("http://localhost:5000/api/routes", {
+          credentials: "include",
+        }),
+        fetch("http://localhost:5000/api/users?role=driver", {
+          credentials: "include",
+        }),
+      ])
+
+      const [routesData, driversData] = await Promise.all([
+        routesRes.json(),
+        driversRes.json(),
+      ])
+      console.log(routesData.data)
+      setRoutes(routesData.data)
+      console.log(driversData.data)
+      setDrivers(driversData.data)
+    } catch (error) {
+      toast.error("Failed to load routes or drivers")
+      console.error(error)
+    }
+  }
+
+  if (tripId) {
+    fetchTrip()
+    fetchRoutesAndDrivers()
+  }
+}, [tripId])
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setLoading(true)
+
+  try {
+    const payload = {
+      route_id: formData.route_id,
+      driver_id: formData.driver_id,
+      scheduled_date: formData.scheduled_date,
+      scheduled_time: formData.scheduled_time,
+      status: formData.status,
+      max_capacity: formData.max_capacity,
+      notes: formData.notes,
+      // DO NOT include current_capacity
+    }
+
+    const res = await fetch(`http://localhost:5000/api/trips/${tripId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      credentials: "include",
+    })
+
+    const result = await res.json()
+
+    if (!res.ok) {
+      throw new Error(result.message || "Something went wrong")
+    }
+
+    toast.success("Trip updated successfully")
+    router.push("/admin/trips")
+  } catch (error: any) {
+    toast.error(`Failed to update trip`)
+    console.error("Submit error:", error)
+  } finally {
+    setLoading(false)
+  }
+}
+
 
   const handleInputChange = (field: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -189,6 +269,7 @@ export default function EditTripPage({ params }: PageProps) {
                   ))}
                 </SelectContent>
               </Select>
+
             </div>
 
             <div className="space-y-2">
@@ -209,6 +290,7 @@ export default function EditTripPage({ params }: PageProps) {
                   ))}
                 </SelectContent>
               </Select>
+
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
