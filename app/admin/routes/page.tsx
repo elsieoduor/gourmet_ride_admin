@@ -45,77 +45,125 @@ export default function RoutesPage() {
   const [searchTerm, setSearchTerm] = useState("")
 
   // Mock data - replace with actual API calls
-  useEffect(() => {
-    const mockRoutes: Route[] = [
-      {
-        id: "1",
-        name: "City Center to Business District",
-        pickup_location: {
-          id: "loc1",
-          name: "City Center",
-        },
-        dropoff_location: {
-          id: "loc2",
-          name: "Business District",
-        },
-        duration_minutes: 30,
-        price_per_person: 1000,
-        max_capacity: 15,
-        is_active: true,
-        created_at: "2024-01-15T10:00:00Z",
-      },
-      {
-        id: "2",
-        name: "University to Shopping Mall",
-        pickup_location: {
-          id: "loc3",
-          name: "University Campus",
-        },
-        dropoff_location: {
-          id: "loc4",
-          name: "Shopping Mall",
-        },
-        duration_minutes: 25,
-        price_per_person: 800,
-        max_capacity: 15,
-        is_active: true,
-        created_at: "2024-01-14T09:00:00Z",
-      },
-      {
-        id: "3",
-        name: "Shopping Mall to Residential Area",
-        pickup_location: {
-          id: "loc4",
-          name: "Shopping Mall",
-        },
-        dropoff_location: {
-          id: "loc5",
-          name: "Residential Area A",
-        },
-        duration_minutes: 35,
-        price_per_person: 1200,
-        max_capacity: 15,
-        is_active: false,
-        created_at: "2024-01-13T08:00:00Z",
-      },
-    ]
+  // useEffect(() => {
+  //   const mockRoutes: Route[] = [
+  //     {
+  //       id: "1",
+  //       name: "City Center to Business District",
+  //       pickup_location: {
+  //         id: "loc1",
+  //         name: "City Center",
+  //       },
+  //       dropoff_location: {
+  //         id: "loc2",
+  //         name: "Business District",
+  //       },
+  //       duration_minutes: 30,
+  //       price_per_person: 1000,
+  //       max_capacity: 15,
+  //       is_active: true,
+  //       created_at: "2024-01-15T10:00:00Z",
+  //     },
+  //     {
+  //       id: "2",
+  //       name: "University to Shopping Mall",
+  //       pickup_location: {
+  //         id: "loc3",
+  //         name: "University Campus",
+  //       },
+  //       dropoff_location: {
+  //         id: "loc4",
+  //         name: "Shopping Mall",
+  //       },
+  //       duration_minutes: 25,
+  //       price_per_person: 800,
+  //       max_capacity: 15,
+  //       is_active: true,
+  //       created_at: "2024-01-14T09:00:00Z",
+  //     },
+  //     {
+  //       id: "3",
+  //       name: "Shopping Mall to Residential Area",
+  //       pickup_location: {
+  //         id: "loc4",
+  //         name: "Shopping Mall",
+  //       },
+  //       dropoff_location: {
+  //         id: "loc5",
+  //         name: "Residential Area A",
+  //       },
+  //       duration_minutes: 35,
+  //       price_per_person: 1200,
+  //       max_capacity: 15,
+  //       is_active: false,
+  //       created_at: "2024-01-13T08:00:00Z",
+  //     },
+  //   ]
 
-    setTimeout(() => {
-      setRoutes(mockRoutes)
-      setLoading(false)
-    }, 1000)
+  //   setTimeout(() => {
+  //     setRoutes(mockRoutes)
+  //     setLoading(false)
+  //   }, 1000)
+  // }, [])
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true)
+      try {
+        const res = await fetch("http://localhost:5000/api/routes", {
+          credentials: "include", // 🔑 Important if cookie-based auth is used
+        })
+
+        if (!res.ok) {
+          console.error("❌ Failed to fetch routes:", res.statusText)
+          return
+        }
+
+        const data = await res.json()
+        console.log("✅ Routes fetched:", data)
+        setRoutes(data.data)
+      } catch (err) {
+        console.error("❌ Error fetching routes:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUsers()
   }, [])
 
+
+  // const handleDeleteRoute = async (routeId: string) => {
+  //   try {
+  //     // Mock delete - replace with actual API call
+  //     await new Promise((resolve) => setTimeout(resolve, 1000))
+  //     setRoutes(routes.filter((route) => route.id !== routeId))
+  //     toast.success("Route deleted successfully")
+  //   } catch (error) {
+  //     toast.error("Failed to delete route")
+  //   }
+  // }
   const handleDeleteRoute = async (routeId: string) => {
-    try {
-      // Mock delete - replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      setRoutes(routes.filter((route) => route.id !== routeId))
-      toast.success("Route deleted successfully")
-    } catch (error) {
-      toast.error("Failed to delete route")
+  console.log("🗑️ Deleting route:", routeId);
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/routes/${routeId}`, {
+      method: "DELETE",
+      credentials: "include", // 👈 to send cookies (auth)
+    });
+
+    const data = await res.json();
+    console.log("✅ Delete response:", data);
+
+    if (res.ok) {
+      setRoutes(routes.filter((route) => route.id !== routeId)); // ✅ Update UI
+    } else {
+      alert(data.error || "Failed to delete route.");
     }
+  } catch (error) {
+    console.error("❌ Delete failed:", error);
+    alert("Something went wrong.");
   }
+};
 
   const filteredRoutes = routes.filter(
     (route) =>
