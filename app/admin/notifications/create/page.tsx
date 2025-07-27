@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { ArrowLeft, Save, Bell } from "lucide-react"
 import { toast } from "sonner"
 
@@ -22,109 +21,90 @@ interface User {
   email: string
 }
 
-interface Notification {
-  id: string
-  user_id: string
-  title: string
-  message: string
-  type: string
-  is_read: boolean
-}
-
-interface PageProps {
-  params: Promise<{ id: string }>
-}
-
-
-export default function EditNotificationPage({ params }: PageProps) {
+export default function CreateNotificationPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [notiId, setNotiId] = useState<string>("")
-  const [initialLoading, setInitialLoading] = useState(true)
   const [users, setUsers] = useState<User[]>([])
-  const [formData, setFormData] = useState<Notification>({
-    id: "",
+  const [formData, setFormData] = useState({
     user_id: "",
     title: "",
     message: "",
     type: "announcement",
-    is_read: false,
   })
 
   // Mock fetch users - replace with actual API call
-  useEffect(() => {
-    const mockUsers: User[] = [
-      { id: "user1", first_name: "John", last_name: "Doe", email: "john@example.com" },
-      { id: "user2", first_name: "Jane", last_name: "Smith", email: "jane@example.com" },
-      { id: "user3", first_name: "Mike", last_name: "Johnson", email: "mike@example.com" },
-    ]
+  // useEffect(() => {
+  //   const mockUsers: User[] = [
+  //     { id: "user1", first_name: "John", last_name: "Doe", email: "john@example.com" },
+  //     { id: "user2", first_name: "Jane", last_name: "Smith", email: "jane@example.com" },
+  //     { id: "user3", first_name: "Mike", last_name: "Johnson", email: "mike@example.com" },
+  //   ]
 
-    setUsers(mockUsers)
-  }, [])
+  //   setUsers(mockUsers)
+  // }, [])
   useEffect(() => {
-        const getParams = async () => {
-          const resolvedParams = await params
-          setNotiId(resolvedParams.id)
-        }
-        getParams()
-      }, [params])
-
-  useEffect(() => {
-    // Mock API call to fetch notification data - replace with actual implementation
-    const fetchNotification = async () => {
+    const fetchUsers = async () => {
+      setLoading(true)
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        const res = await fetch("http://localhost:5000/api/users", {
+          credentials: "include", // 🔑 Important if cookie-based auth is used
+        })
 
-        // Mock notification data
-        const mockNotification: Notification = {
-          id: notiId,
-          user_id: "user1",
-          title: "Booking Confirmation",
-          message: "Your booking #RD001 has been confirmed",
-          type: "booking_confirmation",
-          is_read: true,
+        if (!res.ok) {
+          console.error("❌ Failed to fetch users:", res.statusText)
+          return
         }
 
-        setFormData(mockNotification)
-      } catch (error) {
-        toast.error("Failed to load notification data")
+        const data = await res.json()
+        console.log("✅ Users fetched:", data)
+        setUsers(data.data)
+      } catch (err) {
+        console.error("❌ Error fetching users:", err)
       } finally {
-        setInitialLoading(false)
+        setLoading(false)
       }
     }
 
-    fetchNotification()
-  }, [notiId])
+    fetchUsers()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
+    if (!formData.user_id || !formData.title || !formData.message || !formData.type) {
+      toast.error("All fields are required")
+      setLoading(false)
+      return
+    }
+
     try {
-      // Mock API call - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const res = await fetch("http://localhost:5000/api/notifications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // important for cookie-based auth
+        body: JSON.stringify(formData),
+      })
 
-      toast.success("Notification updated successfully")
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Failed to send notification")
+      }
 
+      toast.success("Notification sent successfully")
       router.push("/admin/notifications")
-    } catch (error) {
-      toast.error("Failed to update notification")
+    } catch (error: any) {
+      console.error("Submit error:", error)
+      toast.error(error.message || "Failed to send notification")
     } finally {
       setLoading(false)
     }
   }
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
-  }
-
-  if (initialLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
-        <div className="h-64 bg-gray-200 rounded animate-pulse"></div>
-      </div>
-    )
   }
 
   return (
@@ -137,8 +117,8 @@ export default function EditNotificationPage({ params }: PageProps) {
           </Link>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-[#2C3E50]">Edit Notification</h1>
-          <p className="text-[#7F8C8D]">Update notification information</p>
+          <h1 className="text-3xl font-bold text-[#2C3E50]">Send Notification</h1>
+          <p className="text-[#7F8C8D]">Create and send a new notification</p>
         </div>
       </div>
 
@@ -149,7 +129,7 @@ export default function EditNotificationPage({ params }: PageProps) {
             <Bell className="h-5 w-5 text-[#27AE60]" />
             Notification Details
           </CardTitle>
-          <CardDescription>Update the details for this notification</CardDescription>
+          <CardDescription>Enter the details for the new notification</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -208,19 +188,10 @@ export default function EditNotificationPage({ params }: PageProps) {
               />
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="is_read"
-                checked={formData.is_read}
-                onCheckedChange={(checked) => handleInputChange("is_read", checked)}
-              />
-              <Label htmlFor="is_read">Mark as Read</Label>
-            </div>
-
             <div className="flex gap-4 pt-4">
               <Button type="submit" disabled={loading} className="bg-[#27AE60] hover:bg-[#229954]">
                 <Save className="h-4 w-4 mr-2" />
-                {loading ? "Updating..." : "Update Notification"}
+                {loading ? "Sending..." : "Send Notification"}
               </Button>
               <Button type="button" variant="outline" asChild>
                 <Link href="/admin/notifications">Cancel</Link>
