@@ -10,26 +10,18 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Search, Edit, Trash2, Filter, Calendar, MapPin, Users } from "lucide-react"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,} from "@/components/ui/alert-dialog"
 
 interface Trip {
   id: string
-  route: {
+  routes: {
     id: string
     name: string
-    pickup_location: { name: string }
-    dropoff_location: { name: string }
+    pickup_locations: { name: string }
+    dropoff_locations: { name: string }
   }
-  driver: {
+  drivers: {
     id: string
     first_name: string
     last_name: string
@@ -50,85 +42,132 @@ export default function TripsPage() {
   const [dateFilter, setDateFilter] = useState<string>("")
 
   // Mock data - replace with actual API calls
-  useEffect(() => {
-    const mockTrips: Trip[] = [
-      {
-        id: "1",
-        route: {
-          id: "route1",
-          name: "City Center → Business District",
-          pickup_location: { name: "City Center" },
-          dropoff_location: { name: "Business District" },
-        },
-        driver: {
-          id: "driver1",
-          first_name: "James",
-          last_name: "Mwangi",
-        },
-        scheduled_date: "2024-01-20",
-        scheduled_time: "12:30",
-        status: "scheduled",
-        current_capacity: 8,
-        max_capacity: 15,
-        created_at: "2024-01-15T10:00:00Z",
-      },
-      {
-        id: "2",
-        route: {
-          id: "route2",
-          name: "University → Shopping Mall",
-          pickup_location: { name: "University Campus" },
-          dropoff_location: { name: "Shopping Mall" },
-        },
-        driver: {
-          id: "driver2",
-          first_name: "Mary",
-          last_name: "Wanjiku",
-        },
-        scheduled_date: "2024-01-21",
-        scheduled_time: "18:00",
-        status: "in_progress",
-        current_capacity: 12,
-        max_capacity: 15,
-        created_at: "2024-01-16T09:00:00Z",
-      },
-    ]
+  // useEffect(() => {
+  //   const mockTrips: Trip[] = [
+  //     {
+  //       id: "1",
+  //       route: {
+  //         id: "route1",
+  //         name: "City Center → Business District",
+  //         pickup_location: { name: "City Center" },
+  //         dropoff_location: { name: "Business District" },
+  //       },
+  //       driver: {
+  //         id: "driver1",
+  //         first_name: "James",
+  //         last_name: "Mwangi",
+  //       },
+  //       scheduled_date: "2024-01-20",
+  //       scheduled_time: "12:30",
+  //       status: "scheduled",
+  //       current_capacity: 8,
+  //       max_capacity: 15,
+  //       created_at: "2024-01-15T10:00:00Z",
+  //     },
+  //     {
+  //       id: "2",
+  //       route: {
+  //         id: "route2",
+  //         name: "University → Shopping Mall",
+  //         pickup_location: { name: "University Campus" },
+  //         dropoff_location: { name: "Shopping Mall" },
+  //       },
+  //       driver: {
+  //         id: "driver2",
+  //         first_name: "Mary",
+  //         last_name: "Wanjiku",
+  //       },
+  //       scheduled_date: "2024-01-21",
+  //       scheduled_time: "18:00",
+  //       status: "in_progress",
+  //       current_capacity: 12,
+  //       max_capacity: 15,
+  //       created_at: "2024-01-16T09:00:00Z",
+  //     },
+  //   ]
 
-    setTimeout(() => {
-      setTrips(mockTrips)
-      setLoading(false)
-    }, 1000)
+  //   setTimeout(() => {
+  //     setTrips(mockTrips)
+  //     setLoading(false)
+  //   }, 1000)
+  // }, [])
+
+  useEffect(() => {
+    const fetchTrips = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch("http://localhost:5000/api/trips",{
+            credentials: "include", // 🔑 Important if cookie-based auth is used
+          })
+
+          if (!response.ok) {
+            console.error("❌ Failed to fetch trips:", response.statusText)
+            return
+          }
+
+        const data = await response.json()
+        console.log("✅ Users fetched:", data.data)
+        setTrips(data.data)
+      } catch (error) {
+        console.error("Failed to fetch trips:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchTrips()
   }, [])
 
+  // const handleDeleteTrip = async (tripId: string) => {
+  //   // Mock delete - replace with actual API call
+  //   setTrips(trips.filter((trip) => trip.id !== tripId))
+  // }
   const handleDeleteTrip = async (tripId: string) => {
-    // Mock delete - replace with actual API call
-    setTrips(trips.filter((trip) => trip.id !== tripId))
-  }
+  try {
+    const response = await fetch(`http://localhost:5000/api/trips/${tripId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
 
-  const filteredTrips = trips.filter((trip) => {
+    if (!response.ok) {
+      throw new Error("Failed to delete trip");
+    }
+
+    // Remove the trip from local state
+    setTrips(prevTrips => prevTrips.filter(trip => trip.id !== tripId));
+  } catch (error) {
+    console.error("Error deleting trip:", error);
+    alert("There was a problem deleting the trip.");
+  }
+};
+
+
+   const filteredTrips = trips
+  .filter((trip) => {
+    const routeName = trip?.routes?.name?.toLowerCase() || ""
+    const driverFirst = trip?.drivers?.first_name?.toLowerCase() || ""
+    const driverLast = trip?.drivers?.last_name?.toLowerCase() || ""
+
     const matchesSearch =
-      trip.route.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      trip.driver.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      trip.driver.last_name.toLowerCase().includes(searchTerm.toLowerCase())
+      routeName.includes(searchTerm.toLowerCase()) ||
+      driverFirst.includes(searchTerm.toLowerCase()) ||
+      driverLast.includes(searchTerm.toLowerCase())
 
     const matchesStatus = statusFilter === "all" || trip.status === statusFilter
     const matchesDate = !dateFilter || trip.scheduled_date === dateFilter
 
     return matchesSearch && matchesStatus && matchesDate
   })
+  .sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime())
+
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case "scheduled":
-        return "bg-blue-500 text-white"
-      case "in_progress":
-        return "bg-[#27AE60] text-white"
-      case "completed":
-        return "bg-[#2980B9] text-white"
-      case "cancelled":
-        return "bg-red-500 text-white"
-      default:
-        return "bg-gray-500 text-white"
+      case "scheduled": return "bg-blue-500 text-white"
+      case "in_progress": return "bg-[#27AE60] text-white"
+      case "completed": return "bg-[#2980B9] text-white"
+      case "cancelled": return "bg-red-500 text-white"
+      default: return "bg-gray-500 text-white"
     }
   }
 
@@ -215,28 +254,24 @@ export default function TripsPage() {
                 <TableRow key={trip.id}>
                   <TableCell>
                     <div className="space-y-1">
-                      <div className="font-medium text-[#2C3E50]">{trip.route.name}</div>
+                      <div className="font-medium text-[#2C3E50]">{trip.routes?.name}</div>
                       <div className="flex items-center gap-1 text-sm text-[#7F8C8D]">
                         <MapPin className="h-3 w-3" />
                         <span>
-                          {trip.route.pickup_location.name} → {trip.route.dropoff_location.name}
+                          {trip.routes.pickup_locations?.name} → {trip.routes.dropoff_locations?.name}
                         </span>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="font-medium text-[#2C3E50]">
-                      {trip.driver.first_name} {trip.driver.last_name}
-                    </div>
+                  <TableCell className="font-medium text-[#2C3E50]">
+                    {trip.drivers.first_name} {trip.drivers.last_name}
                   </TableCell>
                   <TableCell>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1 text-sm">
-                        <Calendar className="h-3 w-3 text-[#7F8C8D]" />
-                        <span>{trip.scheduled_date}</span>
-                      </div>
-                      <div className="text-sm text-[#7F8C8D]">{trip.scheduled_time}</div>
+                    <div className="text-sm flex gap-1 items-center">
+                      <Calendar className="h-3 w-3 text-[#7F8C8D]" />
+                      {trip.scheduled_date}
                     </div>
+                    <div className="text-sm text-[#7F8C8D]">{trip.scheduled_time}</div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
@@ -249,12 +284,12 @@ export default function TripsPage() {
                       <div
                         className="bg-[#27AE60] h-2 rounded-full"
                         style={{ width: `${(trip.current_capacity / trip.max_capacity) * 100}%` }}
-                      ></div>
+                      />
                     </div>
                   </TableCell>
                   <TableCell>
                     <Badge className={getStatusBadgeColor(trip.status)}>
-                      {trip.status.replace("_", " ").charAt(0).toUpperCase() + trip.status.replace("_", " ").slice(1)}
+                      {trip.status.replace("_", " ").replace(/^\w/, c => c.toUpperCase())}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
