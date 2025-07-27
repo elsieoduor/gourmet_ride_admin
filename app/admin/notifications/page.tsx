@@ -29,7 +29,7 @@ interface Notification {
   message: string
   type: string
   is_read: boolean
-  user: {
+  users: {
     first_name: string
     last_name: string
     email: string
@@ -45,90 +45,148 @@ export default function NotificationsPage() {
   const [readFilter, setReadFilter] = useState<string>("all")
 
   // Mock data - replace with actual API calls
+  // useEffect(() => {
+  //   const mockNotifications: Notification[] = [
+  //     {
+  //       id: "1",
+  //       user_id: "user1",
+  //       title: "Booking Confirmation",
+  //       message: "Your booking #RD001 has been confirmed",
+  //       type: "booking_confirmation",
+  //       is_read: true,
+  //       user: {
+  //         first_name: "John",
+  //         last_name: "Doe",
+  //         email: "john@example.com",
+  //       },
+  //       created_at: "2024-01-15T10:00:00Z",
+  //     },
+  //     {
+  //       id: "2",
+  //       user_id: "user2",
+  //       title: "Trip Update",
+  //       message: "Your trip scheduled for today will be delayed by 10 minutes",
+  //       type: "delay_alert",
+  //       is_read: false,
+  //       user: {
+  //         first_name: "Jane",
+  //         last_name: "Smith",
+  //         email: "jane@example.com",
+  //       },
+  //       created_at: "2024-01-16T09:00:00Z",
+  //     },
+  //     {
+  //       id: "3",
+  //       user_id: "user3",
+  //       title: "New Promotion",
+  //       message: "Enjoy 20% off on your next booking with code RIDE20",
+  //       type: "announcement",
+  //       is_read: false,
+  //       user: {
+  //         first_name: "Mike",
+  //         last_name: "Johnson",
+  //         email: "mike@example.com",
+  //       },
+  //       created_at: "2024-01-17T08:00:00Z",
+  //     },
+  //   ]
+
+  //   setTimeout(() => {
+  //     setNotifications(mockNotifications)
+  //     setLoading(false)
+  //   }, 1000)
+  // }, [])
+
   useEffect(() => {
-    const mockNotifications: Notification[] = [
-      {
-        id: "1",
-        user_id: "user1",
-        title: "Booking Confirmation",
-        message: "Your booking #RD001 has been confirmed",
-        type: "booking_confirmation",
-        is_read: true,
-        user: {
-          first_name: "John",
-          last_name: "Doe",
-          email: "john@example.com",
-        },
-        created_at: "2024-01-15T10:00:00Z",
-      },
-      {
-        id: "2",
-        user_id: "user2",
-        title: "Trip Update",
-        message: "Your trip scheduled for today will be delayed by 10 minutes",
-        type: "delay_alert",
-        is_read: false,
-        user: {
-          first_name: "Jane",
-          last_name: "Smith",
-          email: "jane@example.com",
-        },
-        created_at: "2024-01-16T09:00:00Z",
-      },
-      {
-        id: "3",
-        user_id: "user3",
-        title: "New Promotion",
-        message: "Enjoy 20% off on your next booking with code RIDE20",
-        type: "announcement",
-        is_read: false,
-        user: {
-          first_name: "Mike",
-          last_name: "Johnson",
-          email: "mike@example.com",
-        },
-        created_at: "2024-01-17T08:00:00Z",
-      },
-    ]
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/notifications", {
+          method: "GET",
+          credentials: "include", // 👈 VERY IMPORTANT
+        });
 
-    setTimeout(() => {
-      setNotifications(mockNotifications)
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          console.error("Error fetching notifications:", data.error);
+          return;
+        }
+        console.log(data.data)
+        setNotifications(data.data);
+      } catch (err) {
+        console.error("Fetch error:", err);
+      }finally {
       setLoading(false)
-    }, 1000)
-  }, [])
+    }
+    };
 
+    fetchNotifications();
+  }, []);
+
+  // const handleDeleteNotification = async (notificationId: string) => {
+  //   try {
+  //     // Mock delete - replace with actual API call
+  //     await new Promise((resolve) => setTimeout(resolve, 1000))
+  //     setNotifications(notifications.filter((notification) => notification.id !== notificationId))
+  //     toast.success("Notification deleted successfully")
+  //   } catch (error) {
+  //     toast.error("Failed to delete notification")
+  //   }
+  // }
   const handleDeleteNotification = async (notificationId: string) => {
-    try {
-      // Mock delete - replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      setNotifications(notifications.filter((notification) => notification.id !== notificationId))
-      toast.success("Notification deleted successfully")
-    } catch (error) {
-      toast.error("Failed to delete notification")
-    }
-  }
+  try {
+    const res = await fetch(`http://localhost:5000/api/notifications/${notificationId}`, {
+      method: "DELETE",
+      credentials: "include", 
+    });
 
-  const handleMarkAsRead = async (notificationId: string) => {
-    try {
-      // Mock update - replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      setNotifications(
-        notifications.map((notification) =>
-          notification.id === notificationId ? { ...notification, is_read: true } : notification,
-        ),
-      )
-      toast.success("Notification marked as read")
-    } catch (error) {
-      toast.error("Failed to update notification")
-    }
+    if (!res.ok) throw new Error("Failed to delete");
+
+    setNotifications(notifications.filter((n) => n.id !== notificationId));
+    toast.success("Notification deleted successfully");
+  } catch (error) {
+    toast.error("Failed to delete notification");
   }
+};
+
+  const handleMarkAsRead = async (userId: string) => {
+  try {
+    const res = await fetch("http://localhost:5000/api/notifications/mark-all-read", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include", // Important to send cookies
+      body: JSON.stringify({ user_id: userId }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Unknown error");
+    }
+
+    // Update state locally if the API call succeeded
+    setNotifications(
+      notifications.map((notification) => ({
+        ...notification,
+        is_read: true,
+      }))
+    );
+
+    toast.success("All notifications marked as read");
+  } catch (error) {
+    toast.error("Failed to mark notifications as read");
+    console.error("Error marking notifications as read:", error);
+  }
+};
 
   const filteredNotifications = notifications.filter((notification) => {
     const matchesSearch =
       notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       notification.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      notification.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      `${notification.user.first_name} ${notification.user.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
+      notification.users.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      `${notification.users.first_name} ${notification.users.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesType = typeFilter === "all" || notification.type === typeFilter
     const matchesRead =
@@ -252,9 +310,9 @@ export default function NotificationsPage() {
                   </TableCell>
                   <TableCell>
                     <div className="font-medium text-[#2C3E50]">
-                      {notification.user.first_name} {notification.user.last_name}
+                      {notification.users?.first_name} {notification.users?.last_name}
                     </div>
-                    <div className="text-sm text-[#7F8C8D]">{notification.user.email}</div>
+                    <div className="text-sm text-[#7F8C8D]">{notification.users?.email}</div>
                   </TableCell>
                   <TableCell>
                     <Badge className={getTypeBadgeColor(notification.type)}>
