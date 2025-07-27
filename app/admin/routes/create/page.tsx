@@ -34,42 +34,72 @@ export default function CreateRoutePage() {
   })
 
   // Mock fetch locations - replace with actual API call
+  // useEffect(() => {
+  //   const mockLocations: PickupLocation[] = [
+  //     { id: "loc1", name: "City Center" },
+  //     { id: "loc2", name: "Business District" },
+  //     { id: "loc3", name: "University Campus" },
+  //     { id: "loc4", name: "Shopping Mall" },
+  //     { id: "loc5", name: "Residential Area A" },
+  //   ]
+
+  //   setLocations(mockLocations)
+  // }, [])
   useEffect(() => {
-    const mockLocations: PickupLocation[] = [
-      { id: "loc1", name: "City Center" },
-      { id: "loc2", name: "Business District" },
-      { id: "loc3", name: "University Campus" },
-      { id: "loc4", name: "Shopping Mall" },
-      { id: "loc5", name: "Residential Area A" },
-    ]
-
-    setLocations(mockLocations)
-  }, [])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-
+  const fetchLocations = async () => {
     try {
-      // Validate that pickup and dropoff are different
-      if (formData.pickup_location_id === formData.dropoff_location_id) {
-        toast.error("Pickup and drop-off locations cannot be the same")
-        setLoading(false)
-        return
+      const res = await fetch("http://localhost:5000/api/pickup-locations", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to fetch locations");
       }
 
-      // Mock API call - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      toast.success("Route created successfully")
-
-      router.push("/admin/routes")
-    } catch (error) {
-      toast.error("Failed to create route")
-    } finally {
-      setLoading(false)
+      setLocations(data.data); // assuming API returns [{ id, name }, ...]
+    } catch (error: any) {
+      console.error("❌ Error fetching locations:", error);
+      toast.error(error.message || "Failed to load locations");
     }
-  }
+  };
+
+  fetchLocations();
+}, []);
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+  
+    try {
+      const res = await fetch("http://localhost:5000/api/routes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(formData),
+      });
+  
+      const data = await res.json();
+  
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create route");
+      }
+  
+      toast.success("Route created successfully");
+      router.push("/admin/routes");
+    } catch (error: any) {
+      console.error("❌ Error creating route:", error);
+      toast.error(error.message || "Failed to create route");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
