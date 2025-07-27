@@ -40,39 +40,75 @@ export default function CreateTripPage() {
   })
 
   // Mock fetch routes and drivers - replace with actual API calls
+  // useEffect(() => {
+  //   const mockRoutes: Route[] = [
+  //     { id: "route1", name: "City Center → Business District" },
+  //     { id: "route2", name: "University → Shopping Mall" },
+  //     { id: "route3", name: "Shopping Mall → Residential Area" },
+  //   ]
+
+  //   const mockDrivers: Driver[] = [
+  //     { id: "driver1", first_name: "James", last_name: "Mwangi" },
+  //     { id: "driver2", first_name: "Mary", last_name: "Wanjiku" },
+  //   ]
+
+  //   setRoutes(mockRoutes)
+  //   setDrivers(mockDrivers)
+  // }, [])
   useEffect(() => {
-    const mockRoutes: Route[] = [
-      { id: "route1", name: "City Center → Business District" },
-      { id: "route2", name: "University → Shopping Mall" },
-      { id: "route3", name: "Shopping Mall → Residential Area" },
-    ]
+    const fetchData = async () => {
+      try {
+        const [routesRes, driversRes] = await Promise.all([
+          fetch("http://localhost:5000/api/routes", { credentials: "include" }),
+          fetch("http://localhost:5000/api/users?role=driver", { credentials: "include" }),
+        ])
 
-    const mockDrivers: Driver[] = [
-      { id: "driver1", first_name: "James", last_name: "Mwangi" },
-      { id: "driver2", first_name: "Mary", last_name: "Wanjiku" },
-    ]
+        const [routesData, driversData] = await Promise.all([
+          routesRes.json(),
+          driversRes.json(),
+        ])
 
-    setRoutes(mockRoutes)
-    setDrivers(mockDrivers)
-  }, [])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-
-    try {
-      // Mock API call - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      toast.success("Trip created successfully")
-
-      router.push("/admin/trips")
-    } catch (error) {
-      toast.error("Failed to create trip")
-    } finally {
-      setLoading(false)
+        console.log(routesData)
+        setRoutes(routesData.data)
+        console.log(driversData)
+        setDrivers(driversData.data)
+      } catch (err) {
+        toast.error("Failed to load routes or drivers")
+        console.error(err)
+      }
     }
+
+    fetchData()
+  }, [])
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    const res = await fetch("http://localhost:5000/api/trips", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+      credentials: "include", 
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(result.error || "Failed to create trip");
+    }
+
+    toast.success("Trip created successfully!");
+    router.push("/admin/trips");
+  } catch (error: any) {
+    toast.error(error.message || "Failed to create trip");
+  } finally {
+    setLoading(false);
   }
+};
+
 
   const handleInputChange = (field: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
