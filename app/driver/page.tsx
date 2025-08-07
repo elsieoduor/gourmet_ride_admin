@@ -28,7 +28,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { toast } from "sonner"
+// Removed toast import - using simple alert for demo
 
 export default function DriverDashboard() {
   const [currentTrip, setCurrentTrip] = useState({
@@ -98,13 +98,14 @@ export default function DriverDashboard() {
   const handleStartTrip = () => {
     setTripStatus("departed")
     setCurrentTrip((prev) => ({ ...prev, progress: 25 }))
-    toast.success("Trip started! Safe driving!")
+    // Using alert for demo - replace with your toast system
+    alert("Trip started! Safe driving!")
   }
 
   const handleArriveDestination = () => {
     setTripStatus("arrived")
     setCurrentTrip((prev) => ({ ...prev, progress: 100 }))
-    toast.success("Trip completed successfully!")
+    alert("Trip completed successfully!")
   }
 
   const handlePassengerAction = (passengerId: string, action: string) => {
@@ -114,7 +115,7 @@ export default function DriverDashboard() {
         p.id === passengerId ? { ...p, status: action === "board" ? "boarded" : "waiting" } : p,
       ),
     }))
-    toast.success(`Passenger ${action === "board" ? "boarded" : "marked as waiting"}`)
+    alert(`Passenger ${action === "board" ? "boarded" : "marked as waiting"}`)
   }
 
   const getStatusColor = (status: string) => {
@@ -142,65 +143,65 @@ export default function DriverDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4">
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#7F8C8D]">Trips Today</p>
-                <p className="text-2xl font-bold text-[#2C3E50]">{dailyStats.tripsCompleted}</p>
+                <p className="text-xs sm:text-sm text-[#7F8C8D]">Trips Today</p>
+                <p className="text-lg sm:text-2xl font-bold text-[#2C3E50]">{dailyStats.tripsCompleted}</p>
               </div>
-              <Route className="h-8 w-8 text-[#27AE60]" />
+              <Route className="h-6 w-6 sm:h-8 sm:w-8 text-[#27AE60]" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#7F8C8D]">Earnings</p>
-                <p className="text-2xl font-bold text-[#2C3E50]">${dailyStats.totalEarnings}</p>
+                <p className="text-xs sm:text-sm text-[#7F8C8D]">Earnings</p>
+                <p className="text-lg sm:text-2xl font-bold text-[#2C3E50]">${dailyStats.totalEarnings}</p>
               </div>
-              <DollarSign className="h-8 w-8 text-[#27AE60]" />
+              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-[#27AE60]" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#7F8C8D]">Passengers</p>
-                <p className="text-2xl font-bold text-[#2C3E50]">{dailyStats.totalPassengers}</p>
+                <p className="text-xs sm:text-sm text-[#7F8C8D]">Passengers</p>
+                <p className="text-lg sm:text-2xl font-bold text-[#2C3E50]">{dailyStats.totalPassengers}</p>
               </div>
-              <Users className="h-8 w-8 text-[#27AE60]" />
+              <Users className="h-6 w-6 sm:h-8 sm:w-8 text-[#27AE60]" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#7F8C8D]">Rating</p>
-                <p className="text-2xl font-bold text-[#2C3E50]">{dailyStats.rating}</p>
+                <p className="text-xs sm:text-sm text-[#7F8C8D]">Rating</p>
+                <p className="text-lg sm:text-2xl font-bold text-[#2C3E50]">{dailyStats.rating}</p>
               </div>
-              <Star className="h-8 w-8 text-[#27AE60]" />
+              <Star className="h-6 w-6 sm:h-8 sm:w-8 text-[#27AE60]" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4">
+        <Card className="col-span-2 sm:col-span-1">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#7F8C8D]">Hours</p>
-                <p className="text-2xl font-bold text-[#2C3E50]">{dailyStats.hoursWorked}h</p>
+                <p className="text-xs sm:text-sm text-[#7F8C8D]">Hours</p>
+                <p className="text-lg sm:text-2xl font-bold text-[#2C3E50]">{dailyStats.hoursWorked}h</p>
               </div>
-              <Clock className="h-8 w-8 text-[#27AE60]" />
+              <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-[#27AE60]" />
             </div>
           </CardContent>
         </Card>
@@ -208,11 +209,11 @@ export default function DriverDashboard() {
 
       {/* Current Trip */}
       <Card className="border-l-4 border-l-[#27AE60]">
-        <CardHeader>
-          <div className="flex items-center justify-between">
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <CardTitle className="text-[#2C3E50]">{currentTrip.route}</CardTitle>
-              <CardDescription className="text-[#7F8C8D]">
+              <CardTitle className="text-[#2C3E50] text-lg sm:text-xl">{currentTrip.route}</CardTitle>
+              <CardDescription className="text-[#7F8C8D] text-sm">
                 Departure: {currentTrip.departureTime} • ETA: {currentTrip.estimatedArrival} •{" "}
                 {currentTrip.passengers.length} passengers
               </CardDescription>
@@ -229,27 +230,27 @@ export default function DriverDashboard() {
             </div>
           )}
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           <div className="space-y-4">
             {/* Trip Controls */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2">
               {tripStatus === "ready" && (
-                <Button onClick={handleStartTrip} className="bg-[#27AE60] hover:bg-[#229954]">
+                <Button onClick={handleStartTrip} className="bg-[#27AE60] hover:bg-[#229954] w-full sm:w-auto">
                   <Navigation className="h-4 w-4 mr-2" />
                   Start Trip
                 </Button>
               )}
               {tripStatus === "departed" && (
-                <Button onClick={handleArriveDestination} className="bg-[#2980B9] hover:bg-[#2471A3]">
+                <Button onClick={handleArriveDestination} className="bg-[#2980B9] hover:bg-[#2471A3] w-full sm:w-auto">
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Mark as Arrived
                 </Button>
               )}
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-auto">
                 <AlertCircle className="h-4 w-4 mr-2" />
                 Send Delay Alert
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-auto">
                 <MapPin className="h-4 w-4 mr-2" />
                 View Route
               </Button>
@@ -257,68 +258,72 @@ export default function DriverDashboard() {
 
             {/* Passenger List */}
             <div>
-              <h4 className="font-medium text-[#2C3E50] mb-3">
+              <h4 className="font-medium text-[#2C3E50] mb-3 text-sm sm:text-base">
                 Passengers ({currentTrip.passengers.filter((p) => p.status === "boarded").length}/
                 {currentTrip.passengers.length})
               </h4>
               <div className="space-y-3">
                 {currentTrip.passengers.map((passenger) => (
-                  <div key={passenger.id} className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                  <div key={passenger.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-white rounded-lg border gap-3">
                     <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarFallback className="bg-[#27AE60] text-white">
+                      <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                        <AvatarFallback className="bg-[#27AE60] text-white text-xs sm:text-sm">
                           {passenger.name
                             .split(" ")
                             .map((n) => n[0])
                             .join("")}
                         </AvatarFallback>
                       </Avatar>
-                      <div>
-                        <p className="font-medium text-[#2C3E50]">{passenger.name}</p>
-                        <div className="flex items-center gap-1 text-sm text-[#7F8C8D]">
+                      <div className="flex-1">
+                        <p className="font-medium text-[#2C3E50] text-sm sm:text-base">{passenger.name}</p>
+                        <div className="flex items-center gap-1 text-xs sm:text-sm text-[#7F8C8D]">
                           <MapPin className="h-3 w-3" />
                           {passenger.pickup}
                         </div>
-                        <p className="text-xs text-[#7F8C8D]">Food: {passenger.foodItems.join(", ")}</p>
+                        <p className="text-xs text-[#7F8C8D] truncate">Food: {passenger.foodItems.join(", ")}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={getPassengerStatusColor(passenger.status)}>{passenger.status}</Badge>
-                      <Button size="sm" variant="outline">
-                        <Phone className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <MessageSquare className="h-4 w-4" />
-                      </Button>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button size="sm" variant="outline">
-                            <QrCode className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Passenger QR Code</DialogTitle>
-                            <DialogDescription>Scan this code to verify passenger boarding</DialogDescription>
-                          </DialogHeader>
-                          <div className="flex flex-col items-center py-6">
-                            <QrCode className="h-32 w-32 text-[#2C3E50] mb-4" />
-                            <p className="text-lg font-mono">{passenger.qrCode}</p>
-                            <p className="text-sm text-[#7F8C8D] mt-2">{passenger.name}</p>
-                            <div className="flex gap-2 mt-4">
-                              <Button
-                                onClick={() => handlePassengerAction(passenger.id, "board")}
-                                className="bg-[#27AE60] hover:bg-[#229954]"
-                              >
-                                Mark as Boarded
-                              </Button>
-                              <Button variant="outline" onClick={() => handlePassengerAction(passenger.id, "waiting")}>
-                                Mark as Waiting
-                              </Button>
+                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                      <Badge className={getPassengerStatusColor(passenger.status)}>
+                        {passenger.status}
+                      </Badge>
+                      <div className="flex gap-1">
+                        <Button size="sm" variant="outline" className="h-8 w-8 p-0">
+                          <Phone className="h-3 w-3" />
+                        </Button>
+                        <Button size="sm" variant="outline" className="h-8 w-8 p-0">
+                          <MessageSquare className="h-3 w-3" />
+                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button size="sm" variant="outline" className="h-8 w-8 p-0">
+                              <QrCode className="h-3 w-3" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="w-[95vw] max-w-md mx-auto">
+                            <DialogHeader>
+                              <DialogTitle className="text-lg">Passenger QR Code</DialogTitle>
+                              <DialogDescription className="text-sm">Scan this code to verify passenger boarding</DialogDescription>
+                            </DialogHeader>
+                            <div className="flex flex-col items-center py-4 sm:py-6">
+                              <QrCode className="h-24 w-24 sm:h-32 sm:w-32 text-[#2C3E50] mb-4" />
+                              <p className="text-base sm:text-lg font-mono">{passenger.qrCode}</p>
+                              <p className="text-sm text-[#7F8C8D] mt-2">{passenger.name}</p>
+                              <div className="flex flex-col sm:flex-row gap-2 mt-4 w-full">
+                                <Button
+                                  onClick={() => handlePassengerAction(passenger.id, "board")}
+                                  className="bg-[#27AE60] hover:bg-[#229954] w-full sm:w-auto"
+                                >
+                                  Mark as Boarded
+                                </Button>
+                                <Button variant="outline" onClick={() => handlePassengerAction(passenger.id, "waiting")} className="w-full sm:w-auto">
+                                  Mark as Waiting
+                                </Button>
+                              </div>
                             </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -330,17 +335,17 @@ export default function DriverDashboard() {
 
       {/* Upcoming Trips */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-[#2C3E50]">Upcoming Trips</CardTitle>
-          <CardDescription>Your scheduled trips for today</CardDescription>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-[#2C3E50] text-lg sm:text-xl">Upcoming Trips</CardTitle>
+          <CardDescription className="text-sm">Your scheduled trips for today</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           <div className="space-y-4">
             {upcomingTrips.map((trip) => (
-              <div key={trip.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <h4 className="font-medium text-[#2C3E50]">{trip.route}</h4>
-                  <div className="flex items-center gap-4 text-sm text-[#7F8C8D] mt-1">
+              <div key={trip.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-gray-50 rounded-lg gap-3">
+                <div className="flex-1">
+                  <h4 className="font-medium text-[#2C3E50] text-sm sm:text-base">{trip.route}</h4>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-[#7F8C8D] mt-1">
                     <div className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       {trip.departureTime}
@@ -355,9 +360,9 @@ export default function DriverDashboard() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">Scheduled</Badge>
-                  <Button size="sm" variant="outline">
+                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                  <Badge variant="outline" className="text-xs">Scheduled</Badge>
+                  <Button size="sm" variant="outline" className="w-full sm:w-auto">
                     View Details
                   </Button>
                 </div>

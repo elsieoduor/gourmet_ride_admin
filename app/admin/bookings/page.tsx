@@ -126,7 +126,7 @@ export default function BookingsPage() {
           console.log("✅ Bookings fetched:", data.data)
           setBookings(data.data)
         } catch (err) {
-          console.error("❌ Error fetching bookings:", err)
+          console.error(" Error fetching bookings:", err)
         } finally {
           setLoading(false)
         }
