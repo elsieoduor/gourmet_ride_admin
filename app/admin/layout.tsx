@@ -54,9 +54,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                isActive ? "bg-[#27AE60] text-white" : "text-[#2C3E50] hover:bg-[#F7F9F9] hover:text-[#27AE60]"
-              }`}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isActive ? "bg-[#27AE60] text-white" : "text-[#2C3E50] hover:bg-[#F7F9F9] hover:text-[#27AE60]"
+                }`}
               onClick={() => setSidebarOpen(false)}
             >
               <Icon className="h-4 w-4" />
@@ -65,11 +64,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           )
         })}
       </nav>
-      <div className="border-t p-4">
-        <Button variant="ghost" className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700">
-          <LogOut className="h-4 w-4 mr-3" />
-          Sign Out
-        </Button>
+      <div className="border-t p-4 space-y-2">
+        
+        <Link href="auth/login">
+          <Button variant="ghost" className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700">
+            <LogOut className="h-4 w-4 mr-3" />
+            Sign Out
+          </Button>
+        </Link>
       </div>
     </div>
   )
