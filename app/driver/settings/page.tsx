@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import { User, Bell, Shield, Car, Camera, Save, Eye, EyeOff, Trash2, Edit } from "lucide-react"
+import { User, Bell, Shield, Car, Camera, Save, Eye, EyeOff, Trash2, Edit, X } from "lucide-react"
 
 interface DriverProfile {
   firstName: string
@@ -164,7 +164,21 @@ export default function DriverSettings() {
     toast.success("Password changed successfully!")
     setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
   }
+  const [isAddingFeature, setIsAddingFeature] = useState(false)
+  const [newFeatureInput, setNewFeatureInput] = useState("")
 
+  const handleSaveNewFeature = () => {
+    if (newFeatureInput.trim() && !vehicle.features.includes(newFeatureInput.trim())) {
+      setVehicle({ ...vehicle, features: [...vehicle.features, newFeatureInput.trim()] })
+    }
+    setNewFeatureInput("")
+    setIsAddingFeature(false)
+  }
+
+  const handleCancelNewFeature = () => {
+    setNewFeatureInput("")
+    setIsAddingFeature(false)
+  }
   const handleAddVehicleFeature = () => {
     const newFeature = prompt("Enter new vehicle feature:")
     if (newFeature && !vehicle.features.includes(newFeature)) {
@@ -467,7 +481,7 @@ export default function DriverSettings() {
                 <div className="flex items-center justify-between mb-2">
                   <Label>Vehicle Features</Label>
                   {editingVehicle && (
-                    <Button variant="outline" size="sm" onClick={handleAddVehicleFeature} className="bg-transparent">
+                    <Button variant="outline" size="sm" onClick={() => setIsAddingFeature(true)} className="bg-transparent">
                       Add Feature
                     </Button>
                   )}
@@ -499,6 +513,62 @@ export default function DriverSettings() {
               )}
             </CardContent>
           </Card>
+
+          {/* Add Feature Modal */}
+          {isAddingFeature && (
+            <div className="fixed inset-0 bg-transparent flex items-center justify-center z-50">
+              <Card className="w-full max-w-md mx-4">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Add Vehicle Feature</CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCancelNewFeature}
+                      className="h-6 w-6 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="newFeature">Feature Name</Label>
+                    <Input
+                      id="newFeature"
+                      placeholder="Enter vehicle feature..."
+                      value={newFeatureInput}
+                      onChange={(e) => setNewFeatureInput(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSaveNewFeature()
+                        }
+                        if (e.key === 'Escape') {
+                          handleCancelNewFeature()
+                        }
+                      }}
+                      autoFocus
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={handleCancelNewFeature}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleSaveNewFeature}
+                      disabled={!newFeatureInput.trim()}
+                      className="bg-[#27AE60] hover:bg-[#229954]"
+                    >
+                      Add Feature
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </TabsContent>
 
         {/* Notifications Tab */}
