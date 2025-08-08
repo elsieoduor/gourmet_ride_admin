@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet"
 import { Truck, Menu, Home, Route, Users, MapPin, Settings, Bell, LogOut, Calendar, BarChart3, X } from "lucide-react"
+import { Toaster } from "sonner"
 
 const navigation = [
   { name: "Dashboard", href: "/driver", icon: Home },
@@ -47,8 +48,8 @@ export default function DriverLayout({
             key={item.name}
             href={item.href}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
-                ? "bg-gradient-to-r from-[#27AE60] to-[#229954] text-white shadow-lg shadow-[#27AE60]/25"
-                : "text-[#7F8C8D] hover:text-[#2C3E50] hover:bg-gray-50/80 hover:shadow-sm"
+              ? "bg-gradient-to-r from-[#27AE60] to-[#229954] text-white shadow-lg shadow-[#27AE60]/25"
+              : "text-[#7F8C8D] hover:text-[#2C3E50] hover:bg-gray-50/80 hover:shadow-sm"
               } ${mobile ? "w-full mx-2" : ""}`}
           >
             <item.icon className={`h-5 w-5 ${isActive ? "text-white" : ""}`} />
@@ -163,8 +164,8 @@ export default function DriverLayout({
                           <p className="text-xs text-[#7F8C8D]">Driver #001</p>
                           <Badge
                             className={`mt-2 text-xs ${isOnline
-                                ? "bg-gradient-to-r from-[#27AE60] to-[#229954] text-white shadow-sm"
-                                : "bg-red-500 text-white"
+                              ? "bg-gradient-to-r from-[#27AE60] to-[#229954] text-white shadow-sm"
+                              : "bg-red-500 text-white"
                               }`}
                           >
                             {isOnline ? "● Online" : "● Offline"}
@@ -207,8 +208,8 @@ export default function DriverLayout({
             <div className="flex items-center gap-3">
               <Badge
                 className={`cursor-pointer transition-all duration-200 ${isOnline
-                    ? "bg-gradient-to-r from-[#27AE60] to-[#229954] text-white shadow-sm hover:shadow-md"
-                    : "bg-red-500 text-white hover:bg-red-600"
+                  ? "bg-gradient-to-r from-[#27AE60] to-[#229954] text-white shadow-sm hover:shadow-md"
+                  : "bg-red-500 text-white hover:bg-red-600"
                   }`}
                 onClick={() => setIsOnline(!isOnline)}
               >
@@ -235,8 +236,8 @@ export default function DriverLayout({
                   variant={isOnline ? "default" : "destructive"}
                   onClick={() => setIsOnline(!isOnline)}
                   className={`rounded-xl transition-all duration-200 ${isOnline
-                      ? "bg-gradient-to-r from-[#27AE60] to-[#229954] hover:shadow-lg hover:shadow-[#27AE60]/25"
-                      : ""
+                    ? "bg-gradient-to-r from-[#27AE60] to-[#229954] hover:shadow-lg hover:shadow-[#27AE60]/25"
+                    : ""
                     }`}
                 >
                   ● {isOnline ? "Online" : "Go Online"}
@@ -257,6 +258,21 @@ export default function DriverLayout({
 
           {/* Page content */}
           <main className="flex-1 p-6">{children}</main>
+          <Toaster
+            position="top-right"
+            richColors
+            closeButton
+            toastOptions={{
+              style: {
+                background: 'white',
+                border: '1px solid #e5e7eb',
+                color: '#2C3E50',
+                fontSize: '14px',
+                fontWeight: '500',
+              },
+              className: 'toast-custom',
+            }}
+          />
         </div>
       </div>
     </div>

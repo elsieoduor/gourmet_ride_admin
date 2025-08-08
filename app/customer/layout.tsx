@@ -22,7 +22,12 @@ import {
   Heart,
   Menu,
   LogOut,
+  Mail,
+  MessageCircle,
+  Phone,
 } from "lucide-react"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
+import { Separator } from "@/components/ui/separator"
 
 const navigation = [
   { name: "Dashboard", href: "/customer", icon: Home },
@@ -37,6 +42,7 @@ const navigation = [
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const NavContent = () => (
     <div className="flex h-full flex-col">
@@ -56,9 +62,8 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             <Link
               key={item.name}
               href={item.href}
-              className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
-                isActive ? "bg-[#27AE60] text-white" : "text-[#2C3E50] hover:bg-gray-100 hover:text-[#27AE60]"
-              }`}
+              className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${isActive ? "bg-[#27AE60] text-white" : "text-[#2C3E50] hover:bg-gray-100 hover:text-[#27AE60]"
+                }`}
               onClick={() => setSidebarOpen(false)}
             >
               <item.icon
@@ -118,6 +123,81 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">{children}</div>
           </div>
         </main>
+      </div>
+
+      {/* Floating Chat Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Popover open={isChatOpen} onOpenChange={setIsChatOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              size="icon"
+              className="h-14 w-14 rounded-full bg-[#27AE60] hover:bg-[#229954] shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <MessageCircle className="h-6 w-6 text-white" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 mr-4 mb-2 bg-white border border-gray-200 shadow-lg rounded-lg p-4" align="end">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-[#27AE60] flex items-center justify-center">
+                  <MessageCircle className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-[#2C3E50]">Need Help?</h3>
+                  <p className="text-sm text-[#7F8C8D]">We're here to assist you</p>
+                </div>
+              </div>
+
+              <Separator className="bg-gray-200" />
+
+              <div className="space-y-3">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start h-12 hover:bg-[#F7F9F9]"
+                  onClick={() => setIsChatOpen(false)}
+                >
+                  <MessageCircle className="h-4 w-4 mr-3 text-[#27AE60]" />
+                  Start Live Chat
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start h-12 hover:bg-[#F7F9F9]"
+                  onClick={() => setIsChatOpen(false)}
+                >
+                  <Phone className="h-4 w-4 mr-3 text-[#2980B9]" />
+                  Call Support
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start h-12 hover:bg-[#F7F9F9]"
+                  onClick={() => setIsChatOpen(false)}
+                >
+                  <Mail className="h-4 w-4 mr-3 text-[#E67E22]" />
+                  Email Us
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start h-12 hover:bg-[#F7F9F9]"
+                  onClick={() => setIsChatOpen(false)}
+                >
+                  <HelpCircle className="h-4 w-4 mr-3 text-[#9B59B6]" />
+                  FAQ
+                </Button>
+              </div>
+
+              <Separator className="bg-gray-200" />
+
+              <div className="text-center">
+                <p className="text-xs text-[#7F8C8D]">
+                  Available 24/7 • Response within 5 minutes
+                </p>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
     </div>
   )

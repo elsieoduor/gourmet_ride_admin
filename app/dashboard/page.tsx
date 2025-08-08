@@ -5,9 +5,15 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Truck, MapPin, Clock, Calendar, QrCode, Bell, User, History, CreditCard } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Truck, MapPin, Clock, Calendar, QrCode, Bell, User, History, CreditCard, UserCheck, Shield } from "lucide-react"
 
-export default function CustomerDashboard() {
+export default function App() {
   const [activeBookings] = useState([
     {
       id: "RD001",
@@ -32,11 +38,31 @@ export default function CustomerDashboard() {
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
             <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10">
-              <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Link href='/customer/notifications'>
+                <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Link>
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10">
-              <User className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10">
+                  <User className="h-4 w-4 sm:h-5 sm:w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link href="/driver" className="flex items-center gap-2 cursor-pointer">
+                    <UserCheck className="h-4 w-4" />
+                    Driver Portal
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/admin" className="flex items-center gap-2 cursor-pointer">
+                    <Shield className="h-4 w-4" />
+                    Admin Portal
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
@@ -50,7 +76,7 @@ export default function CustomerDashboard() {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Button asChild className="h-16 sm:h-20 bg-[#27AE60] hover:bg-[#229954]">
-            <Link href="/dashboard/book" className="flex flex-col items-center gap-1 sm:gap-2">
+            <Link href="/customer/book" className="flex flex-col items-center gap-1 sm:gap-2">
               <Calendar className="h-5 w-5 sm:h-6 sm:w-6" />
               <span className="text-sm sm:text-base">Book New Ride</span>
             </Link>
