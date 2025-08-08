@@ -17,8 +17,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet"
-import { Truck, Menu, Home, Route, Users, MapPin, Settings, Bell, LogOut, Calendar, BarChart3, X } from "lucide-react"
+import { Truck, Menu, Home, Route, Users, MapPin, Settings, Bell, LogOut, Calendar, BarChart3, X, HelpCircle, Mail, MessageCircle, Phone } from "lucide-react"
 import { Toaster } from "sonner"
+import { Popover, PopoverTrigger, PopoverContent } from "@radix-ui/react-popover"
+import { Separator } from "@radix-ui/react-separator"
 
 const navigation = [
   { name: "Dashboard", href: "/driver", icon: Home },
@@ -38,6 +40,7 @@ export default function DriverLayout({
 }) {
   const pathname = usePathname()
   const [isOnline, setIsOnline] = useState(true)
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const NavItems = ({ mobile = false }: { mobile?: boolean }) => (
     <>
@@ -273,6 +276,81 @@ export default function DriverLayout({
               className: 'toast-custom',
             }}
           />
+
+          {/* Floating Chat Button */}
+          <div className="fixed bottom-6 right-6 z-50">
+            <Popover open={isChatOpen} onOpenChange={setIsChatOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  size="icon"
+                  className="h-14 w-14 rounded-full bg-[#27AE60] hover:bg-[#229954] shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <MessageCircle className="h-6 w-6 text-white" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 mr-4 mb-2 bg-white border border-gray-200 shadow-lg rounded-lg p-4" align="end">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-[#27AE60] flex items-center justify-center">
+                      <MessageCircle className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-[#2C3E50]">Need Help?</h3>
+                      <p className="text-sm text-[#7F8C8D]">We're here to assist you</p>
+                    </div>
+                  </div>
+
+                  <Separator className="bg-gray-200" />
+
+                  <div className="space-y-3">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start h-12 hover:bg-[#F7F9F9]"
+                      onClick={() => setIsChatOpen(false)}
+                    >
+                      <MessageCircle className="h-4 w-4 mr-3 text-[#27AE60]" />
+                      Start Live Chat
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start h-12 hover:bg-[#F7F9F9]"
+                      onClick={() => setIsChatOpen(false)}
+                    >
+                      <Phone className="h-4 w-4 mr-3 text-[#2980B9]" />
+                      Call Support
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start h-12 hover:bg-[#F7F9F9]"
+                      onClick={() => setIsChatOpen(false)}
+                    >
+                      <Mail className="h-4 w-4 mr-3 text-[#E67E22]" />
+                      Email Us
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start h-12 hover:bg-[#F7F9F9]"
+                      onClick={() => setIsChatOpen(false)}
+                    >
+                      <HelpCircle className="h-4 w-4 mr-3 text-[#9B59B6]" />
+                      FAQ
+                    </Button>
+                  </div>
+
+                  <Separator className="bg-gray-200" />
+
+                  <div className="text-center">
+                    <p className="text-xs text-[#7F8C8D]">
+                      Available 24/7 • Response within 5 minutes
+                    </p>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </div>
     </div>
