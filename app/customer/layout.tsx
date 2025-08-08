@@ -82,7 +82,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
             <p className="text-xs text-[#7F8C8D] truncate">john@example.com</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" className="w-full bg-transparent">
+        <Button variant="outline" size="sm" className="w-full bg-transparent" onClick={() => window.location.href = '/auth/login'}>
           <LogOut className="h-4 w-4 mr-2" />
           Sign Out
         </Button>
