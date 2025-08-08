@@ -32,7 +32,7 @@ type Route = {
 }
 
 export default function DriverRoutes() {
-  const [routes, setRoutes] = useState([
+  const [routes] = useState<Route[]>([
     {
       id: "R001",
       name: "City Center Express",
@@ -121,7 +121,6 @@ export default function DriverRoutes() {
       route.pickup.toLowerCase().includes(searchTerm.toLowerCase()) ||
       route.dropoff.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesDifficulty = difficultyFilter === "all" || route.difficulty === difficultyFilter
-
     return matchesSearch && matchesDifficulty
   })
 
@@ -153,28 +152,28 @@ export default function DriverRoutes() {
     }
   }
 
-  const handleViewRoute = (route: any) => {
+  const handleViewRoute = (route: Route) => {
     setSelectedRoute(route)
     setIsViewDialogOpen(true)
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 sm:p-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#2C3E50]">Available Routes</h1>
-          <p className="text-[#7F8C8D]">Explore and learn about your available driving routes</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#2C3E50]">Available Routes</h1>
+          <p className="text-[#7F8C8D] text-sm sm:text-base">Explore and learn about your available driving routes</p>
         </div>
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="shadow-sm">
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="search">Search Routes</Label>
-              <div className="relative">
+              <div className="relative mt-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#7F8C8D]" />
                 <Input
                   id="search"
@@ -188,7 +187,7 @@ export default function DriverRoutes() {
             <div>
               <Label htmlFor="difficulty">Difficulty</Label>
               <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="mt-1">
                   <SelectValue placeholder="All difficulties" />
                 </SelectTrigger>
                 <SelectContent>
@@ -206,6 +205,7 @@ export default function DriverRoutes() {
                   setSearchTerm("")
                   setDifficultyFilter("all")
                 }}
+                className="w-full"
               >
                 <Filter className="h-4 w-4 mr-2" />
                 Clear Filters
@@ -216,30 +216,33 @@ export default function DriverRoutes() {
       </Card>
 
       {/* Routes Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
         {filteredRoutes.map((route) => (
-          <Card key={route.id} className="hover:shadow-lg transition-shadow">
+          <Card
+            key={route.id}
+            className="hover:shadow-lg transition-all duration-200 rounded-lg border border-gray-100"
+          >
             <CardHeader>
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between gap-2">
                 <div>
-                  <CardTitle className="text-[#2C3E50]">{route.name}</CardTitle>
-                  <CardDescription className="text-[#7F8C8D]">{route.description}</CardDescription>
+                  <CardTitle className="text-lg font-semibold text-[#2C3E50]">{route.name}</CardTitle>
+                  <CardDescription className="text-sm text-[#7F8C8D]">{route.description}</CardDescription>
                 </div>
-                <Badge className={getDifficultyColor(route.difficulty)}>{route.difficulty}</Badge>
+                <Badge className={`${getDifficultyColor(route.difficulty)} capitalize`}>{route.difficulty}</Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Route Info */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm">
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-[#27AE60]" />
                   <span className="font-medium">From:</span> {route.pickup}
                 </div>
-                <div className="flex items-center gap-2 text-sm">
+                <div className="flex items-center gap-2">
                   <Navigation className="h-4 w-4 text-[#27AE60]" />
                   <span className="font-medium">To:</span> {route.dropoff}
                 </div>
-                <div className="flex items-center gap-2 text-sm">
+                <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-[#7F8C8D]" />
                   <span>
                     {route.duration} • {route.distance}
@@ -248,7 +251,7 @@ export default function DriverRoutes() {
               </div>
 
               {/* Stats */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div className="text-center p-2 bg-gray-50 rounded">
                   <div className="flex items-center justify-center gap-1">
                     <DollarSign className="h-4 w-4 text-[#27AE60]" />
@@ -266,11 +269,11 @@ export default function DriverRoutes() {
               </div>
 
               {/* Rating and Earnings */}
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 text-yellow-500 fill-current" />
                   <span className="font-medium">{route.rating}</span>
-                  <span className="text-sm text-[#7F8C8D]">({route.totalTrips} trips)</span>
+                  <span className="text-[#7F8C8D]">({route.totalTrips} trips)</span>
                 </div>
                 <div className="text-right">
                   <p className="font-bold text-[#27AE60]">${route.estimatedEarnings.perTrip}</p>
@@ -279,16 +282,22 @@ export default function DriverRoutes() {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2">
-                <Button variant="outline" className="flex-1 bg-transparent" onClick={() => handleViewRoute(route)}>
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => handleViewRoute(route)}
+                >
                   <Eye className="h-4 w-4 mr-2" />
                   View Details
                 </Button>
+
                 <Button className="flex-1 bg-[#27AE60] hover:bg-[#229954]">
                   <Navigation className="h-4 w-4 mr-2" />
                   Start Navigation
                 </Button>
               </div>
+
             </CardContent>
           </Card>
         ))}
@@ -296,10 +305,12 @@ export default function DriverRoutes() {
 
       {/* View Route Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="w-full max-w-4xl sm:max-h-[80vh] sm:overflow-y-auto rounded-lg p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle>Route Details</DialogTitle>
-            <DialogDescription>Complete information about this route</DialogDescription>
+            <DialogTitle className="text-lg sm:text-xl">Route Details</DialogTitle>
+            <DialogDescription className="text-sm">
+              Complete information about this route
+            </DialogDescription>
           </DialogHeader>
           {selectedRoute && (
             <div className="space-y-6">
@@ -308,10 +319,9 @@ export default function DriverRoutes() {
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-lg font-semibold text-[#2C3E50] mb-2">{selectedRoute.name}</h3>
-                    <p className="text-[#7F8C8D]">{selectedRoute.description}</p>
+                    <p className="text-[#7F8C8D] text-sm">{selectedRoute.description}</p>
                   </div>
-
-                  <div className="space-y-2">
+                  <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-[#27AE60]" />
                       <span className="font-medium">Pickup:</span> {selectedRoute.pickup}
@@ -325,17 +335,18 @@ export default function DriverRoutes() {
                       <span className="font-medium">Duration:</span> {selectedRoute.duration}
                     </div>
                   </div>
-
                   <div className="flex items-center gap-4">
-                    <Badge className={getDifficultyColor(selectedRoute.difficulty)}>
+                    <Badge className={`${getDifficultyColor(selectedRoute.difficulty)} capitalize`}>
                       {selectedRoute.difficulty} difficulty
                     </Badge>
+
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 text-yellow-500 fill-current" />
                       <span className="font-medium">{selectedRoute.rating}</span>
                       <span className="text-[#7F8C8D]">({selectedRoute.totalTrips} trips)</span>
                     </div>
                   </div>
+
                 </div>
 
                 <div className="space-y-4">
@@ -343,26 +354,25 @@ export default function DriverRoutes() {
                     <h4 className="font-semibold text-[#2C3E50] mb-2">Earnings Potential</h4>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-3 bg-[#27AE60] bg-opacity-10 rounded">
-                        <p className="text-2xl font-bold text-[#27AE60]">${selectedRoute.estimatedEarnings.perTrip}</p>
-                        <p className="text-sm text-[#7F8C8D]">Per Trip</p>
+                        <p className="text-xl font-bold text-white">${selectedRoute.estimatedEarnings.perTrip}</p>
+                        <p className="text-xs text-gray-100">Per Trip</p>
                       </div>
                       <div className="text-center p-3 bg-[#27AE60] bg-opacity-10 rounded">
-                        <p className="text-2xl font-bold text-[#27AE60]">${selectedRoute.estimatedEarnings.perDay}</p>
-                        <p className="text-sm text-[#7F8C8D]">Per Day</p>
+                        <p className="text-xl font-bold text-white">${selectedRoute.estimatedEarnings.perDay}</p>
+                        <p className="text-xs text-gray-100">Per Day</p>
                       </div>
                     </div>
                   </div>
-
                   <div>
                     <h4 className="font-semibold text-[#2C3E50] mb-2">Route Stats</h4>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-3 bg-gray-50 rounded">
-                        <p className="text-xl font-bold text-[#2C3E50]">${selectedRoute.pricePerPerson}</p>
-                        <p className="text-sm text-[#7F8C8D]">Price per Person</p>
+                        <p className="text-lg font-bold text-[#2C3E50]">${selectedRoute.pricePerPerson}</p>
+                        <p className="text-xs text-[#7F8C8D]">Price per Person</p>
                       </div>
                       <div className="text-center p-3 bg-gray-50 rounded">
-                        <p className="text-xl font-bold text-[#2C3E50]">{selectedRoute.maxCapacity}</p>
-                        <p className="text-sm text-[#7F8C8D]">Max Capacity</p>
+                        <p className="text-lg font-bold text-[#2C3E50]">{selectedRoute.maxCapacity}</p>
+                        <p className="text-xs text-[#7F8C8D]">Max Capacity</p>
                       </div>
                     </div>
                   </div>
@@ -372,11 +382,11 @@ export default function DriverRoutes() {
               {/* Traffic Patterns */}
               <div>
                 <h4 className="font-semibold text-[#2C3E50] mb-3">Traffic Patterns</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {Object.entries(selectedRoute.trafficPatterns).map(([time, level]) => (
                     <div key={time} className="text-center p-3 bg-gray-50 rounded">
-                      <p className="font-medium capitalize">{time}</p>
-                      <p className={`font-bold ${getTrafficColor(level)}`}>{level}</p>
+                      <p className="font-medium capitalize text-sm">{time}</p>
+                      <p className={`font-bold text-sm ${getTrafficColor(level)}`}>{level}</p>
                     </div>
                   ))}
                 </div>
