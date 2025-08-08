@@ -18,9 +18,16 @@ import {
   Bell,
   Plus,
   ArrowRight,
+  HelpCircle,
+  Mail,
+  MessageCircle,
+  Phone,
 } from "lucide-react"
+import { Popover, PopoverTrigger, PopoverContent } from "@radix-ui/react-popover"
+import { Separator } from "@radix-ui/react-separator"
 
 export default function CustomerDashboard() {
+
   const [activeBookings, setActiveBookings] = useState([
     {
       id: "RD001",
@@ -274,6 +281,8 @@ export default function CustomerDashboard() {
           </div>
         </CardContent>
       </Card>
+
+     
     </div>
   )
 }

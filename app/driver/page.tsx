@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
+import { toast } from "sonner"
 import {
   Users,
   MapPin,
@@ -28,7 +29,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-// Removed toast import - using simple alert for demo
 
 export default function DriverDashboard() {
   const [currentTrip, setCurrentTrip] = useState({
@@ -98,24 +98,30 @@ export default function DriverDashboard() {
   const handleStartTrip = () => {
     setTripStatus("departed")
     setCurrentTrip((prev) => ({ ...prev, progress: 25 }))
-    // Using alert for demo - replace with your toast system
-    alert("Trip started! Safe driving!")
+    toast("Trip Started", {
+      description: "Trip started! Safe driving!",
+    })
   }
 
   const handleArriveDestination = () => {
     setTripStatus("arrived")
     setCurrentTrip((prev) => ({ ...prev, progress: 100 }))
-    alert("Trip completed successfully!")
+    toast("Trip Completed", {
+      description: "Trip completed successfully!",
+    })
   }
 
   const handlePassengerAction = (passengerId: string, action: string) => {
+    const passenger = currentTrip.passengers.find(p => p.id === passengerId)
     setCurrentTrip((prev) => ({
       ...prev,
       passengers: prev.passengers.map((p) =>
         p.id === passengerId ? { ...p, status: action === "board" ? "boarded" : "waiting" } : p,
       ),
     }))
-    alert(`Passenger ${action === "board" ? "boarded" : "marked as waiting"}`)
+    toast("Passenger Status Updated", {
+      description: `${passenger?.name} ${action === "board" ? "boarded" : "marked as waiting"}`,
+    })
   }
 
   const getStatusColor = (status: string) => {
